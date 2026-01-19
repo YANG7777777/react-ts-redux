@@ -1,0 +1,32 @@
+.appContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  nav a {
+    color: white;
+    margin-left: 15px;
+    text-decoration: none;
+  }
+}
+
+.mainArea {
+  flex: 1; // 让内容区域占据剩余空间
+  padding: 20px;
+}
+
+.footer {
+  background-color: #eee;
+  text-align: center;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}

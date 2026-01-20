@@ -6,6 +6,25 @@ interface RequestOptions extends RequestInit {
   timeout?: number;
 }
 
+// 存储token的变量
+let token: string | null = null;
+
+/**
+ * 设置token
+ * @param newToken token字符串
+ */
+export const setToken = (newToken: string | null): void => {
+  token = newToken;
+};
+
+/**
+ * 获取token
+ * @returns token字符串或null
+ */
+export const getToken = (): string | null => {
+  return token;
+};
+
 // 传统返回格式：code/message/data
 interface TraditionalResponse<T = any> {
   code: number;
@@ -65,6 +84,12 @@ const request = async <T = any>(
   const requestConfig = {
     ...defaultConfig,
     ...otherOptions,
+    headers: {
+      ...defaultConfig.headers,
+      ...otherOptions.headers,
+      // 添加Authorization头
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   };
   
   // 超时处理

@@ -2,10 +2,12 @@ import { Form, Input, Button, Card, Typography, Divider, message } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './login.module.scss';
 import { login } from '../../api/login';
 import type { LoginParams } from '../../api/login';
 import { encryptRSA, fetchAndSetPublicKey } from '../../utils/encrypt';
+import { loginSuccess } from '../../store/features/authSlice';
 
 const { Title } = Typography;
 
@@ -13,6 +15,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingKey, setFetchingKey] = useState(true);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   
   // 组件加载时获取公钥
   useEffect(() => {
@@ -64,6 +67,12 @@ const LoginPage = () => {
       // 使用新的login API接口
       const data = await login(encryptedValues);
       console.log('Login success:', data);
+      
+      // 将token和用户信息保存到Redux store
+      dispatch(loginSuccess({
+        token: data.token,
+        userInfo: data.userInfo
+      }));
       
       // 登录成功后的处理
       message.success('登录成功');

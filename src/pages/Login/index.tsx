@@ -1,11 +1,11 @@
 import { Form, Input, Button, Card, Typography, Divider, message } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './login.module.scss';
-import { login, getPublicKey } from '../../api/login';
+import { login } from '../../api/login';
 import type { LoginParams } from '../../api/login';
-import { encryptRSA, setPublicKey } from '../../utils/encrypt';
+import { encryptRSA, fetchAndSetPublicKey } from '../../utils/encrypt';
 
 const { Title } = Typography;
 
@@ -14,24 +14,11 @@ const LoginPage = () => {
   const [fetchingKey, setFetchingKey] = useState(true);
   const navigate = useNavigate();
   
-  // 标记是否已经获取过公钥，避免在Strict Mode下重复请求
-  const hasFetchedKey = useRef(false);
-
   // 组件加载时获取公钥
   useEffect(() => {
-    // 只有在未获取过公钥的情况下才请求
-    if (hasFetchedKey.current) {
-      setFetchingKey(false);
-      return;
-    }
-    
-    const fetchPublicKey = async () => {
+    const fetchKey = async () => {
       try {
-        const key = await getPublicKey();
-        setPublicKey(key);
-        console.log('获取公钥成功:', key);
-        // 标记为已获取
-        hasFetchedKey.current = true;
+        await fetchAndSetPublicKey();
       } catch (error) {
         console.error('获取公钥失败:', error);
         message.error('获取公钥失败，请刷新页面重试');
@@ -40,7 +27,7 @@ const LoginPage = () => {
       }
     };
 
-    fetchPublicKey();
+    fetchKey();
   }, []);
 
   const onFinish = async (values: LoginParams) => {

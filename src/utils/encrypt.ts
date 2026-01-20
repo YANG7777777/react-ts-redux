@@ -1,7 +1,44 @@
 import JSEncrypt from 'jsencrypt';
+import { getPublicKey } from '../api/login';
 
 // 存储公钥的变量
 let publicKey: string = '';
+
+// 存储获取公钥的Promise，确保只请求一次
+let publicKeyPromise: Promise<string> | null = null;
+
+/**
+ * 获取并设置公钥
+ * @returns Promise<string> 公钥字符串
+ */
+export const fetchAndSetPublicKey = async (): Promise<string> => {
+  // 如果已经有公钥，直接返回
+  if (publicKey) {
+    return publicKey;
+  }
+  
+  // 如果已经有请求在进行，返回同一个Promise
+  if (publicKeyPromise) {
+    return publicKeyPromise;
+  }
+  
+  // 开始新的请求
+  publicKeyPromise = getPublicKey()
+    .then(key => {
+      publicKey = key;
+      return key;
+    })
+    .catch(error => {
+      console.error('获取公钥失败:', error);
+      throw error;
+    })
+    .finally(() => {
+      // 请求完成后清除Promise（可选，根据需要）
+      // publicKeyPromise = null;
+    });
+  
+  return publicKeyPromise;
+};
 
 /**
  * 设置公钥

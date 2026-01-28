@@ -7,11 +7,9 @@ import authReducer from './features/authSlice';
 const persistConfig = {
     key: 'root',
     storage,
-    // 可以选择哪些reducer需要持久化
-    whitelist: ['counter', 'auth'] // 添加auth到持久化列表
 };
 
-// 创建持久化的reducer，为每个需要持久化的reducer单独创建
+// 创建持久化的reducer
 const persistedCounterReducer = persistReducer({
     ...persistConfig,
     key: 'counter'

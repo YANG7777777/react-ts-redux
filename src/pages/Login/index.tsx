@@ -2,20 +2,30 @@ import { Form, Input, Button, Card, Typography, Divider, message } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './login.module.scss';
 import { login } from '../../api/login';
 import type { LoginParams } from '../../api/login';
 import { encryptRSA, fetchAndSetPublicKey } from '../../utils/encrypt';
 import { loginSuccess } from '../../store/features/authSlice';
+import { store } from '../../store';
 
 const { Title } = Typography;
+
+// 定义RootState类型
+type RootState = ReturnType<typeof store.getState>;
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingKey, setFetchingKey] = useState(true);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
+  // 从Redux store获取认证状态
+  const { token, isAuthenticated } = useSelector((state: RootState) => {
+    // 处理类型安全，确保state.auth存在
+    return (state as any).auth || { token: null, isAuthenticated: false };
+  });
   
   // 组件加载时获取公钥
   useEffect(() => {
@@ -32,6 +42,20 @@ const LoginPage = () => {
 
     fetchKey();
   }, []);
+  
+  // 检查认证状态，已认证则重定向到首页
+  useEffect(() => {
+    // 延迟检查，给Redux Persist时间恢复状态
+    const timer = setTimeout(() => {
+      const hasValidToken = token && isAuthenticated;
+      if (hasValidToken) {
+        // 已认证，重定向到首页
+        navigate('/home', { replace: true });
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [token, isAuthenticated, navigate]);
 
   const onFinish = async (values: LoginParams) => {
     setLoading(true);

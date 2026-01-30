@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import { Button } from 'antd';
+import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
+import styles from './leftMenu.module.scss'
 import {
   AppstoreOutlined,
   CalendarOutlined,
@@ -57,6 +59,11 @@ const items: MenuItem[] = [
 const LeftMenu: React.FC = () => {
   const [mode] = useState<'vertical' | 'inline'>('inline');
   const [theme] = useState<MenuTheme>('light');
+  const [collapsed, setCollapsed] = useState(false);
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
+  };
+  
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -66,17 +73,22 @@ const LeftMenu: React.FC = () => {
   };
 
   return (
-    <>
+    <div className={styles.leftMenu}>
       <Menu
-        style={{ width: 256 }}
+        className={styles.menu}
+        style={{ width: collapsed ? 80 : 210 }}
         selectedKeys={[location.pathname]}
         defaultOpenKeys={['sub1']}
         mode={mode}
         theme={theme}
         items={items}
         onSelect={ onMeunSelected }
+        inlineCollapsed={collapsed}
       />
-    </>
+      <Button type="text" onClick={toggleCollapsed}>
+        {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+      </Button>
+    </div>
   );
 };
 

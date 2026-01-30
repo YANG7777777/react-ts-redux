@@ -1,0 +1,20 @@
+.leftMenu {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.leftMenu {
+    border-inline-end: 1px solid #e8e8e8;
+    .menu {
+        flex: 1;
+        height: calc(100% - 48px);
+        overflow-y: auto;
+        border-inline-end: none !important;
+    }
+}
+
+.leftMenu button {
+    margin: 16px;
+    align-self: flex-start;
+}

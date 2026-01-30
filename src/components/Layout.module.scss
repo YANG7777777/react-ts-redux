@@ -18,6 +18,13 @@
   height: 60px;
   box-sizing: border-box;
   flex-shrink: 0;
+  .logo {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .user {
+    font-size: 14px;
+  }
 }
 
 .mainArea {

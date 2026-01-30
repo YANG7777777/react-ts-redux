@@ -14,6 +14,11 @@ export interface LoginResponse {
   };
 }
 
+export interface LogoutResponse {
+  status: string;
+  message?: string;
+}
+
 export const login = async (values: LoginParams): Promise<LoginResponse> => {
   const response = await request.post<LoginResponse>('/login', values);
   return response.data;
@@ -23,5 +28,11 @@ export const login = async (values: LoginParams): Promise<LoginResponse> => {
 // 获取公钥
 export const getPublicKey = async (): Promise<string> => {
   const response = await request.get<string>('/login/public-key');
+  return response.data;
+};
+
+
+export const logout = async (): Promise<LogoutResponse> => {
+  const response = await request.post<LogoutResponse>('/logout');
   return response.data;
 };

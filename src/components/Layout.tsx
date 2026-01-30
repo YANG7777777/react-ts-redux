@@ -1,25 +1,18 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { UserOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { Avatar, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { logout } from '../store/features/authSlice';
 import { useDispatch } from 'react-redux';
+import LeftMenu from './LeftMenu';
 
 
 
 import styles from './Layout.module.scss';
 const Layout = () => {
-    const location = useLocation();
     const user = useSelector((state: any) => state.auth);
     const dispatch = useDispatch();
-    
-    // 菜单项配置
-    const menuItems = [
-        { path: '/home', label: '首页' },
-        { path: '/about', label: '关于我们' },
-        { path: '/dashboard', label: '仪表盘' }
-    ];
 
     const items: MenuProps['items'] = [
         {
@@ -65,20 +58,7 @@ const Layout = () => {
 
             <div className={styles.mainArea}>
                 {/* 左侧菜单 */}
-                <aside className={styles.sidebar}>
-                    <ul className={styles.sidebarMenu}>
-                        {menuItems.map((item) => (
-                            <li key={item.path} className={styles.sidebarMenuItem}>
-                                <Link 
-                                    to={item.path} 
-                                    className={`${styles.sidebarMenuLink} ${location.pathname === item.path ? styles.active : ''}`}
-                                >
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </aside>
+                <LeftMenu />
                 
                 {/* 右侧内容区域 */}
                 <main className={styles.content}>

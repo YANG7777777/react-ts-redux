@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <!-- 圆角白色背景 -->
+    <rect width="16" height="16" rx="2" fill="#FFFFFF"/>
+
+    <!-- Y：最左点 x=3，确保左侧留白 = 右侧留白 -->
+    <path d="M3,3
+           L5,8
+           L7,3
+           M5,8
+           L5,12"
+          fill="none"
+          stroke="#000000"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- J：保持最右点 x=13（右侧留白 = 16 - 13 = 3）-->
+    <path d="M12,2.5
+           Q13,2.5 13,4
+           L13,11
+           Q13,13 11.5,13
+           Q10.5,13 10.5,11.5"
+          fill="none"
+          stroke="#000000"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+</svg>

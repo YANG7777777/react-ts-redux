@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["vite/client"],  // 自动提供 import.meta.env 类型
     "target": "ESNext", // 将代码编译为最新版本的 JS
     "lib": [
       "ESNext",

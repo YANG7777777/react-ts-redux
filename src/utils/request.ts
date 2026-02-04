@@ -44,7 +44,7 @@ type ResponseData<T = any> = TraditionalResponse<T> | NewResponse;
 
 // 默认配置
 const defaultConfig: RequestOptions = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  baseURL: import.meta.env.VITE_APP_API_TARGET || '',
   timeout: parseInt(import.meta.env.VITE_REQUEST_TIMEOUT || '10000'),
   headers: {
     'Content-Type': 'application/json',
@@ -57,10 +57,10 @@ const request = async <T = any>(
   options: RequestOptions = {}
 ): Promise<ResponseData<T>> => {
   const { baseURL = defaultConfig.baseURL, params, ...otherOptions } = options;
-  
+
   // 构建完整URL
   let fullUrl = `${baseURL}${url}`;
-  
+
   // 处理查询参数
   if (params) {
     const searchParams = new URLSearchParams();
@@ -74,12 +74,12 @@ const request = async <T = any>(
       fullUrl += (fullUrl.includes('?') ? '&' : '?') + paramsString;
     }
   }
-  
+
   // 处理请求体
   if (otherOptions.body && typeof otherOptions.body === 'object' && !(otherOptions.body instanceof FormData)) {
     otherOptions.body = JSON.stringify(otherOptions.body);
   }
-  
+
   // 请求拦截器
   const requestConfig = {
     ...defaultConfig,
@@ -91,28 +91,28 @@ const request = async <T = any>(
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
-  
+
   // 超时处理
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => {
       reject(new Error('请求超时'));
     }, requestConfig.timeout);
   });
-  
+
   try {
     const response = await Promise.race([
       fetch(fullUrl, requestConfig),
       timeoutPromise,
     ]) as Response;
-    
+
     // 检查响应状态
     if (!response.ok) {
       throw new Error(`HTTP错误! 状态: ${response.status}`);
     }
-    
+
     // 解析响应数据
     const data = await response.json() as ResponseData<T>;
-    
+
     // 响应拦截器
     // 检查是否为传统格式 (code/message/data)
     if ('code' in data) {
@@ -121,13 +121,13 @@ const request = async <T = any>(
       }
       return data;
     }
-    
+
     // 检查是否为新格式 (status/message/xxx)
     if ('status' in data) {
       if (data.status !== 'ok' && data.status !== '200') {
         throw new Error(data.message || '请求失败');
       }
-      
+
       // 针对获取公钥接口的特殊处理
       if (data.public_key) {
         // 转换为传统格式返回
@@ -137,7 +137,7 @@ const request = async <T = any>(
           data: data.public_key
         } as TraditionalResponse<T>;
       }
-      
+
       // 对于其他新格式，尝试提取data字段或直接返回
       if (data.data) {
         return {
@@ -146,7 +146,7 @@ const request = async <T = any>(
           data: data.data
         } as TraditionalResponse<T>;
       }
-      
+
       // 直接返回新格式，但转换为传统格式的结构
       return {
         code: 200,
@@ -154,7 +154,7 @@ const request = async <T = any>(
         data: data
       } as TraditionalResponse<T>;
     }
-    
+
     // 未知格式，直接返回
     console.warn('未知的响应格式:', data);
     return data;

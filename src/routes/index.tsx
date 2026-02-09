@@ -1,10 +1,7 @@
-import {Route, Routes} from 'react-router-dom';
-import HomePage from '../pages/Home/index.tsx'
+import { RouterProvider, createBrowserRouter} from 'react-router-dom';
+import { routes } from './routes.tsx';
 
-const AppRoutes = () => (
-    <Routes>
-        <Route path="/home" element={<HomePage />} />
-    </Routes>
-);
-
-export default AppRoutes;
+export default function Router() {
+    const router = createBrowserRouter(routes);
+    return <RouterProvider router={router} />;
+}

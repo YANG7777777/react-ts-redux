@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { store } from '@/store';
 
@@ -19,7 +19,6 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
   });
 
   const [isChecking, setIsChecking] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // 延迟检查，给Redux Persist时间恢复状态
@@ -40,8 +39,7 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
 
   if (!hasValidToken) {
     // 未认证，重定向到登录页面
-    navigate('/login', { replace: true });
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   // 已认证，渲染子组件

@@ -1,3 +1,5 @@
+// 在父路由组件中，<Outlet> 会动态渲染当前匹配的子路由对应的组件。
+// 允许父路由定义共享布局（如导航栏、侧边栏），子路由内容通过 <Outlet> 插入到布局中的指定位置。
 import {Outlet} from 'react-router-dom';
 import {UserOutlined} from '@ant-design/icons';
 

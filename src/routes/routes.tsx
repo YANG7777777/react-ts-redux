@@ -4,9 +4,9 @@ import {Outlet, Navigate} from "react-router-dom";
 import Layout from '../Layout/index'
 import { BarChartOutlined, HomeOutlined, TeamOutlined } from '@ant-design/icons';
 
-import Home from '../pages/Home'
-import DashboardPage from '../pages/DashboardPage'
-import About from '../pages/About'
+import Home from '@/pages/Home/index'
+import DashboardPage from '@/pages/DashboardPage'
+import About from '@/pages/About/index'
 
 //本地的路由配置,如果需要从后端获取路由配置,可以跟这个路由表比对过滤后，再传props给APP中的Router
 export const BaseRoutes = [

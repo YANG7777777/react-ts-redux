@@ -10,8 +10,12 @@ export default defineConfig(({mode}) => {
             react()
         ],
         resolve: {
+            // alias: {
+            //     "@": path.resolve("./src")
+            // },
             alias: {
-                "@": path.resolve("./src")
+                '@': path.resolve(__dirname, './src'),
+                '@components': path.resolve(__dirname, './src/components'),
             },
         },
         // 服务器配置

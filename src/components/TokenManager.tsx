@@ -13,7 +13,6 @@ const TokenManager = () => {
   useEffect(() => {
     // 当token变化时，更新请求工具中的token
     setToken(token);
-    console.log('Token updated in request tool:', token);
   }, [token]);
 
   // 该组件不需要渲染任何内容

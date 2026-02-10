@@ -2,11 +2,12 @@ import Login from '../pages/Login'
 import AuthGuard from '../components/AuthGuard'
 import {Outlet, Navigate} from "react-router-dom";
 import Layout from '../Layout/index'
-import { BarChartOutlined, HomeOutlined, TeamOutlined } from '@ant-design/icons';
+import { BarChartOutlined, HomeOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 
 import Home from '@/pages/Home/index'
 import DashboardPage from '@/pages/DashboardPage'
 import About from '@/pages/About/index'
+import UsersPage from '@/pages/Users/index'
 
 //本地的路由配置,如果需要从后端获取路由配置,可以跟这个路由表比对过滤后，再传props给APP中的Router
 export const BaseRoutes = [
@@ -38,6 +39,16 @@ export const BaseRoutes = [
             hidden: false,
             title: "关于",
             icon: <TeamOutlined />,
+        },
+    },
+    {
+        path: "/users",
+        element: <UsersPage />,
+        name: "users",
+        meta: {
+            hidden: false,
+            title: "用户管理",
+            icon: <UserOutlined />,
         },
     },
 

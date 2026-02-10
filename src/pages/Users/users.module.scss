@@ -1,11 +1,21 @@
 .users {
-    padding: 20px;
-    .title {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 20px;
+  padding: 20px;
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .titleLeft {
+      font-size: 20px;
+      font-weight: bold;
     }
-    .tableBox {
-        
+    .titleRight {
+      font-size: 16px;
+      font-weight: normal;
     }
+  }
+  .tableBox {
+  }
 }

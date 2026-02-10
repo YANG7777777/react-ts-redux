@@ -65,7 +65,8 @@ const request = async <T = any>(
   if (params) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      // 过滤掉 undefined、null 和空字符串
+      if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, String(value));
       }
     });

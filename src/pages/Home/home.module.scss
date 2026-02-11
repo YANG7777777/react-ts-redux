@@ -1,7 +1,6 @@
 .home {
-  //background: red;
-  .title {
-    font-size: 48px;
-    text-align: center;
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }

@@ -7,6 +7,7 @@ import CommonTable from "@/components/CommonTable";
 // 通用表单组件
 import CommonForm from "@/components/CommonForm";
 import { getUserList, UserParams, UserResponse, deleteUser, createUser, updateUser, UserFormData } from "@/api/user";
+import CommonTitle from "@/components/CommonTitle";
 
 interface DataType extends UserResponse {
   key: string;
@@ -204,12 +205,9 @@ const UsersPage = () => {
 
   return (
     <div className={styles.users}>
-      <div className={styles.title}>
-        <div className={styles.titleLeft}>用户管理</div>
-        <div className={styles.titleRight}>
-          <Button onClick={onUserAdd} type="primary" color="primary">添加用户</Button>
-        </div>
-      </div>
+      <CommonTitle title="用户管理">
+        <Button onClick={onUserAdd} type="primary" color="primary">添加用户</Button>
+      </CommonTitle>
 
       {/* 搜索表单 */}
       <div className={styles.searchBox} style={{ marginBottom: 20 }}>

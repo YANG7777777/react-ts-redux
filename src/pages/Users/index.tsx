@@ -212,12 +212,13 @@ const UsersPage = () => {
       </div>
 
       {/* 搜索表单 */}
-      <div style={{ marginBottom: 20 }}>
+      <div className={styles.searchBox} style={{ marginBottom: 20 }}>
         <CommonForm<FormType>
           form={form}
           layout="inline"
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
+          className={styles.searchForm}
         >
           <Form.Item<FormType>
             name="username"
@@ -233,7 +234,7 @@ const UsersPage = () => {
             <Input placeholder="请输入用户ID" />
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item className={styles.searchItem}>
             <Button type="primary" htmlType="submit" loading={loading}>
               搜索
             </Button>
@@ -252,7 +253,7 @@ const UsersPage = () => {
       </div>
 
       {/* 用户表格 */}
-      <div className={styles.formBox}>
+      <div className={styles.tableBox}>
         <CommonTable<DataType> 
           columns={columns} 
           dataSource={data}

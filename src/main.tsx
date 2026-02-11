@@ -6,6 +6,9 @@ import { persistor, store } from './store'; // 导入 Redux 的 store（状态�
 import { Provider } from 'react-redux'; // Redux 的 Provider，使整个应用能访问 Redux store。
 import { PersistGate } from "redux-persist/integration/react"; // redux-persist 的组件，用于在状态恢复期间延迟渲染子组件。
 import 'antd/dist/reset.css'; // Ant Design 5.x+ 推荐使用 reset.css
+import './assets/ant_custom.scss'; // 自定义 Ant Design 样式
+
+
 
 // 创建根节点
 const root = ReactDOM.createRoot(

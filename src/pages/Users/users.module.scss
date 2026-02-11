@@ -1,12 +1,15 @@
 .users {
   padding: 20px;
+  height: 100%;
   .title {
     font-size: 20px;
     font-weight: bold;
-    margin-bottom: 20px;
+    padding-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
+    border-bottom: 1px solid #e8e8e8;
     .titleLeft {
       font-size: 20px;
       font-weight: bold;
@@ -16,6 +19,18 @@
       font-weight: normal;
     }
   }
+  .searchBox {
+    padding-top: 16px;
+    width: 100%;
+    .searchForm {
+        width: 100%;
+        .searchItem {
+            margin-left: auto;
+            margin-right: 0;
+        }
+    }
+  }
   .tableBox {
+    height: calc(100% - 102px);
   }
 }

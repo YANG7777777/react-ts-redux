@@ -22,14 +22,26 @@ const LeftMenu: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const items = useMemo<MenuItem[]>(() => {
-    return BaseRoutes
+  const buildMenuItems = (routes: any[]): any[] => {
+    return routes
       .filter(route => !route.meta?.hidden)
-      .map(route => ({
-        key: route.path as string,
-        icon: route.meta?.icon,
-        label: route.meta?.title,
-      }));
+      .map(route => {
+        const menuItem: any = {
+          key: route.path as string,
+          icon: route.meta?.icon,
+          label: route.meta?.title,
+        };
+        
+        if (route.children && route.children.length > 0) {
+          menuItem.children = buildMenuItems(route.children);
+        }
+        
+        return menuItem;
+      });
+  };
+
+  const items = useMemo<MenuItem[]>(() => {
+    return buildMenuItems(BaseRoutes);
   }, []);
   
   const onMeunSelected: MenuProps['onSelect'] = (e) => {

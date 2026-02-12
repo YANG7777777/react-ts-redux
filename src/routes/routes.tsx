@@ -2,7 +2,7 @@ import Login from '../pages/Login'
 import AuthGuard from '../components/AuthGuard'
 import {Outlet, Navigate} from "react-router-dom";
 import Layout from '../Layout/index'
-import { BarChartOutlined, HomeOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { BarChartOutlined, HomeOutlined, TeamOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 
 import Home from '@/pages/Home/index'
 import DashboardPage from '@/pages/DashboardPage'
@@ -41,15 +41,27 @@ export const BaseRoutes = [
             icon: <TeamOutlined />,
         },
     },
+    // 系统管理（仅作为分组，无 element）
     {
-        path: "/users",
-        element: <UsersPage />,
-        name: "users",
+        path: "/system",
+        name: "system",
         meta: {
             hidden: false,
-            title: "用户管理",
-            icon: <UserOutlined />,
+            title: "系统管理",
+            icon: <SettingOutlined />,
         },
+        children: [
+            {
+                path: "/system/users",
+                element: <UsersPage />,
+                name: "users",
+                meta: {
+                    hidden: false,
+                    title: "用户管理",
+                    icon: <UserOutlined />,
+                },
+            },
+        ],
     },
 
 

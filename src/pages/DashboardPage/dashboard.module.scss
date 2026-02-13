@@ -1,4 +1,22 @@
 .dashboard {
+  padding: 20px;
   height: 100%;
-  padding: 0 20px;
+  
+  .chartContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .chartItem {
+    width: 100%;
+    height: 400px;
+  }
+  
+  @media (max-width: 768px) {
+    .chartContainer {
+      grid-template-columns: 1fr;
+    }
+  }
 }

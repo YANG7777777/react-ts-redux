@@ -20,6 +20,7 @@
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.5",
+    "react-transition-group": "^4.4.5",
     "redux-persist": "^6.0.0"
   },
   "devDependencies": {
@@ -27,6 +28,7 @@
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "@types/react-transition-group": "^4.4.12",
     "@vitejs/plugin-react": "^5.1.0",
     "baseline-browser-mapping": "^2.9.19",
     "eslint": "^9.39.1",

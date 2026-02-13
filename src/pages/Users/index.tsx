@@ -174,22 +174,26 @@ const UsersPage = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      width: 280,
     },
     {
       title: "用户名",
       dataIndex: "username",
       key: "username",
       render: (text: string) => <a>{text}</a>,
+      width: 280,
     },
     {
       title: "邮箱",
       dataIndex: "email",
       key: "email",
+      width: 680,
     },
     {
       title: "创建时间",
       dataIndex: "created_at",
       key: "created_at",
+      width: 8180,
     },
     {
       title: "操作",
@@ -200,6 +204,7 @@ const UsersPage = () => {
           <Button onClick={() => onUserDelete(record)} disabled={record.id === 1} color="danger" variant="text">删除</Button>
         </Space>
       ),
+      width: 280,
     },
   ];
 

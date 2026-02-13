@@ -1,8 +1,7 @@
 // 在父路由组件中，<Outlet> 会动态渲染当前匹配的子路由对应的组件。
 // 允许父路由定义共享布局（如导航栏、侧边栏），子路由内容通过 <Outlet> 插入到布局中的指定位置。
-import {Outlet} from 'react-router-dom';
+import {Outlet, useLocation} from 'react-router-dom';
 import {UserOutlined} from '@ant-design/icons';
-
 /**
  * 从 Redux store 中获取状态：允许组件订阅 Redux store 的特定部分（state），并在状态变化时自动重新渲染。
  * 支持复杂的选择逻辑：可以传入一个 选择器函数（selector function），用于计算派生数据（derived data）。
@@ -22,6 +21,7 @@ import styles from './index.module.scss';
 const Index = () => {
     const user = useSelector((state: any) => state.auth);
     const collapsed = useSelector((state: any) => state.counter.menuCollapsed);
+    const location = useLocation();
     const dispatch = useDispatch();
 
     const items: MenuProps['items'] = [
@@ -74,14 +74,16 @@ const Index = () => {
 
                 {/* 右侧内容区域 */}
                 <main className={styles.content}>
-                    {/*Outlet 会渲染当前 URL 匹配的子路由组件。*/}
-                    {/*会根据当前 URL 自动渲染匹配的子路由组件，无需手动控制*/}
-                    <Outlet/>
+                    <div 
+                        className={styles.pageWrapper}
+                        key={location.pathname}
+                    >
+                        <Outlet/>
+                    </div>
                 </main>
             </div>
 
             <footer className={styles.footer}>
-                {/*增加动画效果、过渡效果*/}
                 <div className={styles.animation} style={{width: collapsed ? '80px' : '200px'}}></div>
                 <div className={styles.footerContent}>© 2025 后台管理系统</div>
             </footer>

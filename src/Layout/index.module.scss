@@ -79,6 +79,24 @@
   overflow-y: auto;
   margin: 0;
   box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.pageWrapper {
+  min-height: 100%;
+  animation: pageSlideIn 0.3s ease-out;
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .footer {
@@ -99,4 +117,3 @@
     transition: width 0.2s ease-in-out;
   }
 }
-

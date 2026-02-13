@@ -90,5 +90,13 @@
   box-sizing: border-box;
   line-height: 10px;
   flex-shrink: 0;
+  display: flex;
+  .footerContent {
+    text-align: center;
+    flex: 1;
+  }
+  .animation {
+    transition: width 0.2s ease-in-out;
+  }
 }
 

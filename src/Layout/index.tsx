@@ -21,6 +21,7 @@ import styles from './index.module.scss';
 
 const Index = () => {
     const user = useSelector((state: any) => state.auth);
+    const collapsed = useSelector((state: any) => state.counter.menuCollapsed);
     const dispatch = useDispatch();
 
     const items: MenuProps['items'] = [
@@ -47,6 +48,8 @@ const Index = () => {
         items,
         onClick: handleMenuClick,
     };
+
+
 
     return (
         <div className={styles.appContainer}>
@@ -78,7 +81,9 @@ const Index = () => {
             </div>
 
             <footer className={styles.footer}>
-                © 2025 后台管理系统
+                {/*增加动画效果、过渡效果*/}
+                <div className={styles.animation} style={{width: collapsed ? '80px' : '200px'}}></div>
+                <div className={styles.footerContent}>© 2025 后台管理系统</div>
             </footer>
         </div>
     );

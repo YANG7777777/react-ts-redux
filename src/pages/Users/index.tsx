@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-// 
+//
 import { Space, Form, Input, Button, message, Modal } from "antd";
 import styles from "./users.module.scss";
 // 通用表格组件
@@ -105,7 +105,7 @@ const UsersPage = () => {
         try {
           await deleteUser(record.id);
           message.success('删除成功');
-          fetchUserList(searchParams);
+          await fetchUserList(searchParams);
         } catch (error) {
           console.error('删除用户失败:', error);
           message.error('删除失败');
@@ -118,10 +118,10 @@ const UsersPage = () => {
   const fetchUserList = async (params: UserParams = {}) => {
     setLoading(true);
     try {
-      const res = await getUserList({ 
-        current: pagination.current, 
-        pageSize: pagination.pageSize, 
-        ...params 
+      const res = await getUserList({
+        current: pagination.current,
+        pageSize: pagination.pageSize,
+        ...params
       });
 
       const formattedData = res.list.map((item) => ({
@@ -233,7 +233,7 @@ const UsersPage = () => {
           </Form.Item>
 
           <Form.Item className={styles.searchItem}>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button type="primary" htmlType="submit">
               搜索
             </Button>
             <Button style={{ marginLeft: 8 }} onClick={() => {
@@ -252,8 +252,8 @@ const UsersPage = () => {
 
       {/* 用户表格 */}
       <div className={styles.tableBox}>
-        <CommonTable<DataType> 
-          columns={columns} 
+        <CommonTable<DataType>
+          columns={columns}
           dataSource={data}
           loading={loading}
           pagination={{

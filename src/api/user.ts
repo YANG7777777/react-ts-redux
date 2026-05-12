@@ -12,6 +12,7 @@ export interface UserResponse {
   username: string;
   email: string;
   address: string;
+  role?: number;
   created_at: string;
   updated_at: string;
 }
@@ -35,6 +36,7 @@ export interface UserFormData {
   email?: string;
   address?: string;
   password?: string;
+  role?: number;
 }
 
 export const createUser = async (data: UserFormData): Promise<UserResponse> => {

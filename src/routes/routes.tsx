@@ -8,6 +8,7 @@ import Home from '@/pages/Home/index'
 import DashboardPage from '@/pages/DashboardPage'
 import About from '@/pages/About/index'
 import UsersPage from '@/pages/Users/index'
+import RolePage from '@/pages/ROLE/index'
 
 //本地的路由配置,如果需要从后端获取路由配置,可以跟这个路由表比对过滤后，再传props给APP中的Router
 export const BaseRoutes = [
@@ -59,6 +60,16 @@ export const BaseRoutes = [
                     hidden: false,
                     title: "用户管理",
                     icon: <UserOutlined />,
+                },
+            },
+            {
+                path: "/system/role",
+                element: <RolePage />,
+                name: "role",
+                meta: {
+                    hidden: false,
+                    title: "角色管理",
+                    icon: <SettingOutlined />,
                 },
             },
         ],

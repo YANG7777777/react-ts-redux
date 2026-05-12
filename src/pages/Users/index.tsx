@@ -231,7 +231,7 @@ const UsersPage = () => {
 
   return (
     <div className={styles.users}>
-      <CommonTitle title="用户管理">
+      <CommonTitle title="账号管理">
         <Button onClick={onUserAdd} type="primary" color="primary">添加用户</Button>
       </CommonTitle>
 

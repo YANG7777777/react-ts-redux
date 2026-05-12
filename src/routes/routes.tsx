@@ -6,7 +6,7 @@ import { BarChartOutlined, HomeOutlined, TeamOutlined, UserOutlined, SettingOutl
 
 import Home from '@/pages/Home/index'
 import DashboardPage from '@/pages/DashboardPage'
-import About from '@/pages/About/index'
+// import About from '@/pages/About/index'
 import UsersPage from '@/pages/Users/index'
 import RolePage from '@/pages/ROLE/index'
 import DepartmentPage from '@/pages/Departments/index'
@@ -23,26 +23,6 @@ export const BaseRoutes = [
             icon: <HomeOutlined />,
         },
     },
-    {
-        path: "/dashboard",
-        element: <DashboardPage />,
-        name: "dashboard",
-        meta: {
-            hidden: false,
-            title: "看板",
-            icon: <BarChartOutlined />,
-        },
-    },
-    {
-        path: "/about",
-        element: <About />,
-        name: "about",
-        meta: {
-            hidden: false,
-            title: "关于",
-            icon: <TeamOutlined />,
-        },
-    },
     // 系统管理（仅作为分组，无 element）
     {
         path: "/system",
@@ -53,16 +33,6 @@ export const BaseRoutes = [
             icon: <SettingOutlined />,
         },
         children: [
-            {
-                path: "/system/users",
-                element: <UsersPage />,
-                name: "users",
-                meta: {
-                    hidden: false,
-                    title: "账号管理",
-                    icon: <UserOutlined />,
-                },
-            },
             {
                 path: "/system/role",
                 element: <RolePage />,
@@ -85,8 +55,47 @@ export const BaseRoutes = [
             },
         ],
     },
-
-
+    {
+        path: "/usersInfo",
+        name: "usersInfo",
+        meta: {
+            hidden: false,
+            title: "信息管理",
+            icon: <TeamOutlined />,
+        },
+        children: [
+            {
+                path: "/usersInfo/users",
+                element: <UsersPage />,
+                name: "usersInfoUsers",
+                meta: {
+                    hidden: false,
+                    title: "账号管理",
+                    icon: <UserOutlined />,
+                },
+            },
+            // {
+            //     path: "/about/users",
+            //     element: <UsersPage />,
+            //     name: "users",
+            //     meta: {
+            //         hidden: false,
+            //         title: "账号管理",
+            //         icon: <UserOutlined />,
+            //     },
+            // },
+        ],
+    },
+    {
+        path: "/dashboard",
+        element: <DashboardPage />,
+        name: "dashboard",
+        meta: {
+            hidden: false,
+            title: "看板",
+            icon: <BarChartOutlined />,
+        },
+    },
 ]
 
 export const routes = [

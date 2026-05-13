@@ -6,10 +6,10 @@ import { BarChartOutlined, HomeOutlined, TeamOutlined, UserOutlined, SettingOutl
 
 import Home from '@/pages/Home/index'
 import DashboardPage from '@/pages/DashboardPage'
-// import About from '@/pages/About/index'
 import UsersPage from '@/pages/Users/index'
 import RolePage from '@/pages/ROLE/index'
 import DepartmentPage from '@/pages/Departments/index'
+import UserInfo from '@/pages/UserInfo/index'
 
 //本地的路由配置,如果需要从后端获取路由配置,可以跟这个路由表比对过滤后，再传props给APP中的Router
 export const BaseRoutes = [
@@ -74,16 +74,16 @@ export const BaseRoutes = [
                     icon: <UserOutlined />,
                 },
             },
-            // {
-            //     path: "/about/users",
-            //     element: <UsersPage />,
-            //     name: "users",
-            //     meta: {
-            //         hidden: false,
-            //         title: "账号管理",
-            //         icon: <UserOutlined />,
-            //     },
-            // },
+            {
+                path: "/usersInfo/employee",
+                element: <UserInfo />,
+                name: "employee",
+                meta: {
+                    hidden: false,
+                    title: "员工信息",
+                    icon: <TeamOutlined />,
+                },
+            },
         ],
     },
     {

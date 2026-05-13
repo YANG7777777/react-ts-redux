@@ -10,6 +10,7 @@ export interface DepartmentParams {
 export interface DepartmentResponse {
   id: number;
   dept_name: string;
+  dept_code: string;
   parent_id?: number;
   parent_name?: string;
   created_at: string;

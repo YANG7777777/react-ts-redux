@@ -1,0 +1,33 @@
+.userInfo {
+  padding: 20px;
+  height: 100%;
+}
+
+.searchBox {
+  margin: 20px 0;
+}
+
+.searchForm {
+  display: flex;
+  align-items: center;
+}
+
+.searchItem {
+  display: flex;
+  gap: 8px;
+}
+
+.tableBox {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  height: calc(100% - 106px);
+}
+
+.status-active {
+  color: #52c41a;
+}
+
+.status-inactive {
+  color: #f5222d;
+}

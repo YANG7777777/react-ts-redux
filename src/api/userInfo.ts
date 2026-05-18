@@ -6,6 +6,8 @@ export interface UserInfoResponse {
   name: string;
   dept_code?: string;
   department: string;
+  role_id?: number;
+  role_code?: string;
   position: string;
   email: string;
   phone: string;
@@ -34,6 +36,7 @@ export interface UserInfoFormData {
   name?: string;
   dept_code?: string;
   department?: string;
+  role_id?: number;
   position?: string;
   email?: string;
   phone?: string;
@@ -62,5 +65,5 @@ export const updateUserInfo = async (id: number, data: UserInfoFormData): Promis
 };
 
 export const deleteUserInfo = async (id: number): Promise<void> => {
-  await request.delete(`/users/info/${id}`);
+  await request.delete(`/employees/delete/${id}`);
 };

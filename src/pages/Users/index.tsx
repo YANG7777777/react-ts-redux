@@ -7,6 +7,7 @@ import CommonTable from "@/components/CommonTable";
 // 通用表单组件
 import CommonForm from "@/components/CommonForm";
 import { getUserList, UserParams, UserResponse, deleteUser, createUser, updateUser, UserFormData } from "@/api/user";
+import { getRoleList, RoleResponse } from "@/api/role";
 import CommonTitle from "@/components/CommonTitle";
 
 interface DataType extends UserResponse {
@@ -45,6 +46,8 @@ const UsersPage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   // 当前编辑用户
   const [editingUser, setEditingUser] = useState<DataType | null>(null);
+  // 角色列表
+  const [roles, setRoles] = useState<RoleResponse[]>([]);
 
   // 添加用户按钮
   const onUserAdd = () => {
@@ -141,8 +144,18 @@ const UsersPage = () => {
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const res = await getRoleList();
+      setRoles(res);
+    } catch (error) {
+      console.error('获取角色列表失败:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUserList(searchParams);
+    fetchRoles();
   }, [pagination.current, pagination.pageSize, searchParams]);
 
   // 搜索用户
@@ -336,9 +349,9 @@ const UsersPage = () => {
             rules={[{ required: true, message: '请选择角色' }]}
           >
             <Select placeholder="请选择角色">
-              <Select.Option value={0}>超管</Select.Option>
-              <Select.Option value={1}>管理员</Select.Option>
-              <Select.Option value={2}>员工</Select.Option>
+              {roles.map(role => (
+                <Select.Option key={role.id} value={role.role_code}>{role.role_name}</Select.Option>
+              ))}
             </Select>
           </Form.Item>
         </Form>

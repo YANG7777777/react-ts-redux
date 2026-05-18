@@ -3,26 +3,20 @@ import request from '../utils/request';
 export interface RoleParams {
   role_name?: string;
   id?: number;
-  current?: number;
-  pageSize?: number;
 }
 
 export interface RoleResponse {
   id: number;
   role_name: string;
   role_type: number;
+  role_code: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface RoleListResponse {
-  list: RoleResponse[];
-  total: number;
-}
-
-export const getRoleList = async (params: RoleParams = {}): Promise<RoleListResponse> => {
-  const response = await request.get<RoleListResponse>('/roles/all', params);
-  return response.data as unknown as RoleListResponse;
+export const getRoleList = async (params: RoleParams = {}): Promise<RoleResponse[]> => {
+  const response = await request.get<RoleResponse[]>('/roles/all', params);
+  return response.data as unknown as RoleResponse[];
 };
 
 export const deleteRole = async (id: number): Promise<void> => {

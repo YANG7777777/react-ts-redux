@@ -8,6 +8,7 @@ import CommonForm from "@/components/CommonForm";
 import CommonTitle from "@/components/CommonTitle";
 import { getUserInfoList, UserInfoResponse, UserInfoParams, UserInfoFormData, createUserInfo, updateUserInfo, deleteUserInfo } from "@/api/userInfo";
 import { getDepartmentList, DepartmentResponse } from "@/api/department";
+import { getRoleList, RoleResponse } from "@/api/role";
 
 interface DataType extends UserInfoResponse {
   key: string;
@@ -48,11 +49,13 @@ const UserInfoPage = () => {
   const [editingEmployee, setEditingEmployee] = useState<DataType | null>(null);
   const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
+  const [roles, setRoles] = useState<RoleResponse[]>([]);
 
   const positions = ['经理', '主管', '工程师', '设计师', '专员'];
 
   useEffect(() => {
     fetchDepartments();
+    fetchRoles();
   }, []);
 
   const fetchDepartments = async () => {
@@ -63,6 +66,15 @@ const UserInfoPage = () => {
       setTreeData(tree);
     } catch (error) {
       console.error('获取部门列表失败:', error);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const res = await getRoleList();
+      setRoles(res);
+    } catch (error) {
+      console.error('获取角色列表失败:', error);
     }
   };
 
@@ -79,7 +91,7 @@ const UserInfoPage = () => {
         return {
           title: dept.dept_name,
           value: dept.dept_code,
-          key: String(dept.id),
+          key: dept.dept_code,
           children: children.length > 0 ? children : undefined,
         };
       });
@@ -97,6 +109,7 @@ const UserInfoPage = () => {
       name: record.name,
       dept_code: record.dept_code,
       department: record.department || '',
+      role_id: record.role_id,
       position: record.position,
       email: record.email,
       phone: record.phone,
@@ -234,6 +247,20 @@ const UserInfoPage = () => {
       width: 120,
     },
     {
+      title: "角色",
+      dataIndex: "role_code",
+      key: "role_code",
+      render: (text: number) => {
+        const roleMap: Record<number, string> = {
+          0: '超管',
+          1: '管理员',
+          2: '员工',
+        };
+        return <a>{roleMap[text] ?? '未知'}</a>;
+      },
+      width: 120,
+    },
+    {
       title: "邮箱",
       dataIndex: "email",
       key: "email",
@@ -266,6 +293,7 @@ const UserInfoPage = () => {
       title: "创建时间",
       dataIndex: "created_at",
       key: "created_at",
+      width: 200,
     },
     {
       title: "操作",
@@ -373,6 +401,17 @@ const UserInfoPage = () => {
             <Select placeholder="请选择职位">
               {positions.map(pos => (
                 <Select.Option key={pos} value={pos}>{pos}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item<UserInfoFormData>
+            name="role_id"
+            label="角色"
+            rules={[{ required: true, message: '请选择角色' }]}
+          >
+            <Select placeholder="请选择角色" allowClear>
+              {roles.map(role => (
+                <Select.Option key={role.id} value={role.id}>{role.role_name}</Select.Option>
               ))}
             </Select>
           </Form.Item>

@@ -1,0 +1,43 @@
+.attendance {
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: calc(100vh - 80px);
+}
+
+.searchBox {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.searchForm {
+  display: flex;
+  align-items: center;
+}
+
+.searchItem {
+  display: flex;
+  gap: 8px;
+}
+
+.tableBox {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.status-active {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.status-inactive {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.status-pending {
+  color: #faad14;
+  font-weight: 500;
+}

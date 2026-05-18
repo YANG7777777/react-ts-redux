@@ -18,12 +18,6 @@ interface FormType {
   id?: number;
 }
 
-interface PaginationState {
-  current: number;
-  pageSize: number;
-  total: number;
-}
-
 // 角色列表页面
 const RolePage = () => {
   // 搜索表单
@@ -35,12 +29,6 @@ const RolePage = () => {
   const [loading, setLoading] = useState(false);
   // 搜索参数
   const [searchParams, setSearchParams] = useState<RoleParams>({});
-  // 分页状态
-  const [pagination, setPagination] = useState<PaginationState>({
-    current: 1,
-    pageSize: 10,
-    total: 0,
-  });
   // 弹窗是否可见
   const [modalVisible, setModalVisible] = useState(false);
   // 当前编辑角色
@@ -113,23 +101,15 @@ const RolePage = () => {
   const fetchRoleList = async (params: RoleParams = {}) => {
     setLoading(true);
     try {
-      const res = await getRoleList({
-        current: pagination.current,
-        pageSize: pagination.pageSize,
-        ...params
-      });
+      const res = await getRoleList(params);
 
       console.log('res', res);
-      
-      const formattedData = res.list.map((item) => ({
+
+      const formattedData = res.map((item) => ({
         ...item,
         key: String(item.id),
       }));
       setData(formattedData);
-      setPagination((prev) => ({
-        ...prev,
-        total: res.total,
-      }));
     } catch (error) {
       console.error('获取角色列表失败:', error);
     } finally {
@@ -139,30 +119,17 @@ const RolePage = () => {
 
   useEffect(() => {
     fetchRoleList(searchParams);
-  }, [pagination.current, pagination.pageSize, searchParams]);
+  }, [searchParams]);
 
   // 搜索角色
   const onFinish = async (values: FormType) => {
     console.log('表单提交:', values);
     setSearchParams(values);
-    setPagination((prev) => ({
-      ...prev,
-      current: 1,
-    }));
   };
 
   const onFinishFailed = (errorInfo: any) => {
     console.log('表单验证失败:', errorInfo);
     message.error('请检查表单填写！');
-  };
-
-  // 分页改变
-  const handlePaginationChange = (page: number, pageSize: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      current: page,
-      pageSize,
-    }));
   };
 
   // 表格列定义
@@ -253,10 +220,6 @@ const RolePage = () => {
             <Button style={{ marginLeft: 8 }} onClick={() => {
               form.resetFields();
               setSearchParams({});
-              setPagination((prev) => ({
-                ...prev,
-                current: 1,
-              }));
             }}>
               重置
             </Button>
@@ -270,15 +233,7 @@ const RolePage = () => {
           columns={columns}
           dataSource={data}
           loading={loading}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            showSizeChanger: true,
-            pageSizeOptions: ['10', '20', '50', '100'],
-            showTotal: (total) => `共 ${total} 条`,
-            onChange: handlePaginationChange,
-          }}
+          pagination={false}
         />
       </div>
 
@@ -306,7 +261,7 @@ const RolePage = () => {
             rules={[{ required: true, message: '请选择角色类型' }]}
           >
             <Select placeholder="请选择角色类型">
-              <Select.Option value={0}>超管</Select.Option>
+              {/* <Select.Option value={0}>超管</Select.Option> */}
               <Select.Option value={1}>管理员</Select.Option>
               <Select.Option value={2}>员工</Select.Option>
             </Select>

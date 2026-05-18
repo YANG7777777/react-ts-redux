@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Space, Form, Input, Button, message, Modal } from "antd";
+import { Form, Input, Button, message } from "antd";
 import styles from "../attendance.module.scss";
 import CommonTable from "@/components/CommonTable";
 import CommonForm from "@/components/CommonForm";
-import { getClockRecordList, ClockRecordParams, ClockRecordResponse, deleteClockRecord } from "@/api/attendance";
+import { getClockRecordList, ClockRecordParams, ClockRecordResponse } from "@/api/attendance";
 import CommonTitle from "@/components/CommonTitle";
 
 interface DataType extends ClockRecordResponse {
@@ -11,8 +11,8 @@ interface DataType extends ClockRecordResponse {
 }
 
 interface FormType {
-  user_name?: string;
-  id?: number;
+  employee_name?: string;
+  employee_id?: number;
 }
 
 interface PaginationState {
@@ -31,25 +31,6 @@ const ClockRecordPage = () => {
     pageSize: 10,
     total: 0,
   });
-
-  const onClockRecordDelete = (record: DataType) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除打卡记录 "${record.user_name}" 吗？`,
-      okText: '确认',
-      cancelText: '取消',
-      onOk: async () => {
-        try {
-          await deleteClockRecord(record.id);
-          message.success('删除成功');
-          fetchClockRecordList(searchParams);
-        } catch (error) {
-          console.error('删除打卡记录失败:', error);
-          message.error('删除失败');
-        }
-      },
-    });
-  };
 
   const fetchClockRecordList = async (params: ClockRecordParams = {}) => {
     setLoading(true);
@@ -80,7 +61,7 @@ const ClockRecordPage = () => {
   }, [pagination.current, pagination.pageSize, searchParams]);
 
   const onFinish = async (values: FormType) => {
-    setSearchParams(values);
+    setSearchParams(values as ClockRecordParams);
     setPagination((prev) => ({
       ...prev,
       current: 1,
@@ -102,34 +83,25 @@ const ClockRecordPage = () => {
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "员工ID",
+      dataIndex: "employee_id",
+      key: "employee_id",
       width: 80,
     },
     {
       title: "员工姓名",
-      dataIndex: "user_name",
-      key: "user_name",
-      width: 120,
+      dataIndex: "employee_name",
+      key: "employee_name",
     },
     {
       title: "上班打卡时间",
       dataIndex: "clock_in_time",
       key: "clock_in_time",
-      width: 180,
     },
     {
       title: "下班打卡时间",
       dataIndex: "clock_out_time",
       key: "clock_out_time",
-      width: 180,
-    },
-    {
-      title: "工作日期",
-      dataIndex: "work_date",
-      key: "work_date",
-      width: 120,
     },
     {
       title: "状态",
@@ -140,22 +112,11 @@ const ClockRecordPage = () => {
           {text === 1 ? '正常' : '异常'}
         </span>
       ),
-      width: 100,
     },
     {
       title: "创建时间",
       dataIndex: "created_at",
       key: "created_at",
-    },
-    {
-      title: "操作",
-      key: "action",
-      render: (_: any, record: DataType) => (
-        <Space size="middle">
-          <Button onClick={() => onClockRecordDelete(record)} color="danger" variant="text">删除</Button>
-        </Space>
-      ),
-      width: 120,
     },
   ];
 
@@ -172,17 +133,17 @@ const ClockRecordPage = () => {
           className={styles.searchForm}
         >
           <Form.Item<FormType>
-            name="user_name"
+            name="employee_name"
             label="员工姓名"
           >
             <Input placeholder="请输入员工姓名" />
           </Form.Item>
 
           <Form.Item<FormType>
-            name="id"
-            label="记录ID"
+            name="employee_id"
+            label="员工ID"
           >
-            <Input placeholder="请输入记录ID" />
+            <Input placeholder="请输入员工ID" />
           </Form.Item>
 
           <Form.Item className={styles.searchItem}>

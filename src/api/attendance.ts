@@ -55,7 +55,7 @@ export interface LeaveRequestResponse {
 }
 
 export interface LeaveRequestListResponse {
-  data: LeaveRequestResponse[];
+  list: LeaveRequestResponse[];
   page: number;
   pageSize: number;
   total: number;

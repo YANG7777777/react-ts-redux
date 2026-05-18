@@ -89,7 +89,7 @@ const LeaveRequestPage = () => {
         pageSize: pagination.pageSize,
         ...params
       });
-      const formattedData = res.data.map((item) => ({
+      const formattedData = res.list.map((item) => ({
         ...item,
         key: String(item.id),
       }));

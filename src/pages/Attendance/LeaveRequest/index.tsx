@@ -1,19 +1,29 @@
 import { useState, useEffect } from "react";
-import { Space, Form, Input, Button, message, Modal, Select } from "antd";
+import { Space, Form, Input, Button, message, Modal, Select, DatePicker } from "antd";
 import styles from "../attendance.module.scss";
 import CommonTable from "@/components/CommonTable";
 import CommonForm from "@/components/CommonForm";
-import { getLeaveRequestList, LeaveRequestParams, LeaveRequestResponse, deleteLeaveRequest } from "@/api/attendance";
+import { getLeaveRequestList, LeaveRequestParams, LeaveRequestResponse, deleteLeaveRequest, addLeaveRequest, AddLeaveRequestParams } from "@/api/attendance";
 import CommonTitle from "@/components/CommonTitle";
+import dayjs from 'dayjs';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
 
 interface DataType extends LeaveRequestResponse {
   key: string;
 }
 
 interface FormType {
-  user_name?: string;
+  employee_name?: string;
   id?: number;
   status?: number;
+}
+
+interface AddLeaveFormType {
+  leave_type: number;
+  start_date: dayjs.Dayjs;
+  end_date: dayjs.Dayjs;
+  reason?: string;
 }
 
 interface PaginationState {
@@ -23,12 +33,12 @@ interface PaginationState {
 }
 
 const leaveTypeMap: Record<number, string> = {
-  1: '事假',
-  2: '病假',
-  3: '年假',
-  4: '婚假',
-  5: '产假',
-  6: '其他',
+  0: '事假',
+  1: '病假',
+  2: '年假',
+  3: '婚假',
+  4: '产假',
+  5: '其他',
 };
 
 const statusMap: Record<number, string> = {
@@ -39,19 +49,23 @@ const statusMap: Record<number, string> = {
 
 const LeaveRequestPage = () => {
   const [form] = Form.useForm<FormType>();
+  const [addForm] = Form.useForm<AddLeaveFormType>();
   const [data, setData] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useState<LeaveRequestParams>({});
+  const [modalVisible, setModalVisible] = useState(false);
   const [pagination, setPagination] = useState<PaginationState>({
     current: 1,
     pageSize: 10,
     total: 0,
   });
 
+  const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+
   const onLeaveRequestDelete = (record: DataType) => {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除请假申请 "${record.user_name}" 吗？`,
+      content: `确定要删除请假申请 "${record.employee_name}" 吗？`,
       okText: '确认',
       cancelText: '取消',
       onOk: async () => {
@@ -75,7 +89,7 @@ const LeaveRequestPage = () => {
         pageSize: pagination.pageSize,
         ...params
       });
-      const formattedData = res.list.map((item) => ({
+      const formattedData = res.data.map((item) => ({
         ...item,
         key: String(item.id),
       }));
@@ -116,6 +130,31 @@ const LeaveRequestPage = () => {
     }));
   };
 
+  const handleAddClick = () => {
+    addForm.resetFields();
+    setModalVisible(true);
+  };
+
+  const handleAddSubmit = async (values: AddLeaveFormType) => {
+    try {
+      const params: AddLeaveRequestParams = {
+        employee_id: userInfo?.id || 0,
+        employee_name: userInfo?.username || '',
+        leave_type: values.leave_type,
+        start_date: values.start_date.format('YYYY-MM-DD'),
+        end_date: values.end_date.format('YYYY-MM-DD'),
+        reason: values.reason,
+      };
+      await addLeaveRequest(params);
+      message.success('申请成功');
+      setModalVisible(false);
+      fetchLeaveRequestList(searchParams);
+    } catch (error) {
+      console.error('申请失败:', error);
+      message.error('申请失败');
+    }
+  };
+
   const columns = [
     {
       title: "ID",
@@ -125,8 +164,8 @@ const LeaveRequestPage = () => {
     },
     {
       title: "员工姓名",
-      dataIndex: "user_name",
-      key: "user_name",
+      dataIndex: "employee_name",
+      key: "employee_name",
       width: 120,
     },
     {
@@ -184,7 +223,9 @@ const LeaveRequestPage = () => {
 
   return (
     <div className={styles.attendance}>
-      <CommonTitle title="请假申请"></CommonTitle>
+      <CommonTitle title="请假申请">
+        <Button onClick={handleAddClick} type="primary" color="primary">申请请假</Button>
+      </CommonTitle>
 
       <div className={styles.searchBox} style={{ marginBottom: 20 }}>
         <CommonForm<FormType>
@@ -195,7 +236,7 @@ const LeaveRequestPage = () => {
           className={styles.searchForm}
         >
           <Form.Item<FormType>
-            name="user_name"
+            name="employee_name"
             label="员工姓名"
           >
             <Input placeholder="请输入员工姓名" />
@@ -239,6 +280,66 @@ const LeaveRequestPage = () => {
           }}
         />
       </div>
+
+      <Modal
+        title="申请请假"
+        open={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        footer={null}
+      >
+        <CommonForm<AddLeaveFormType>
+          form={addForm}
+          layout="vertical"
+          onFinish={handleAddSubmit}
+          onFinishFailed={onFinishFailed}
+        >
+          <Form.Item<AddLeaveFormType>
+            name="leave_type"
+            label="请假类型"
+            rules={[{ required: true, message: '请选择请假类型' }]}
+          >
+            
+            <Select placeholder="请选择请假类型">
+              <Select.Option value={0}>事假</Select.Option>
+              <Select.Option value={1}>病假</Select.Option>
+              <Select.Option value={2}>年假</Select.Option>
+              <Select.Option value={3}>婚假</Select.Option>
+              <Select.Option value={4}>产假</Select.Option>
+              <Select.Option value={5}>其他</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item<AddLeaveFormType>
+            name="start_date"
+            label="开始日期"
+            rules={[{ required: true, message: '请选择开始日期' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item<AddLeaveFormType>
+            name="end_date"
+            label="结束日期"
+            rules={[{ required: true, message: '请选择结束日期' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item<AddLeaveFormType>
+            name="reason"
+            label="请假原因"
+          >
+            <Input.TextArea rows={4} placeholder="请输入请假原因" />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit">提交申请</Button>
+              <Button onClick={() => setModalVisible(false)}>取消</Button>
+            </Space>
+          </Form.Item>
+        </CommonForm>
+      </Modal>
     </div>
   );
 };

@@ -245,7 +245,7 @@ const UsersPage = () => {
   return (
     <div className={styles.users}>
       <CommonTitle title="账号管理">
-        <Button onClick={onUserAdd} type="primary" color="primary">添加用户</Button>
+        {/* <Button onClick={onUserAdd} type="primary" color="primary">添加用户</Button> */}
       </CommonTitle>
 
       {/* 搜索表单 */}

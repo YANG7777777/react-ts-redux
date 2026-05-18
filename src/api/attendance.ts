@@ -34,7 +34,7 @@ export const deleteClockRecord = async (id: number): Promise<void> => {
 };
 
 export interface LeaveRequestParams {
-  user_name?: string;
+  employee_name?: string;
   id?: number;
   page?: number;
   pageSize?: number;
@@ -43,8 +43,8 @@ export interface LeaveRequestParams {
 
 export interface LeaveRequestResponse {
   id: number;
-  user_id: number;
-  user_name: string;
+  employee_id: number;
+  employee_name: string;
   leave_type: number;
   start_date: string;
   end_date: string;
@@ -55,18 +55,37 @@ export interface LeaveRequestResponse {
 }
 
 export interface LeaveRequestListResponse {
-  list: LeaveRequestResponse[];
+  data: LeaveRequestResponse[];
+  page: number;
+  pageSize: number;
   total: number;
+  totalPages: number;
 }
 
 export const getLeaveRequestList = async (params: LeaveRequestParams = {}): Promise<LeaveRequestListResponse> => {
-  const response = await request.get<LeaveRequestListResponse>('/leave-requests/all', params);
+  const response = await request.get<LeaveRequestListResponse>('/leave-applications/all', params);
   return response.data;
 };
 
 export const deleteLeaveRequest = async (id: number): Promise<void> => {
-  await request.delete(`/leave-requests/delete/${id}`);
+  await request.delete(`/leave-applications/delete/${id}`);
 };
+
+// 新增请假申请
+export interface AddLeaveRequestParams {
+  employee_id: number;
+  employee_name: string;
+  leave_type: number;
+  start_date: string;
+  end_date: string;
+  reason?: string;
+}
+
+export const addLeaveRequest = async (params: AddLeaveRequestParams): Promise<void> => {
+  await request.post('/leave-applications/add', params);
+};
+
+
 
 export interface OvertimeRequestParams {
   user_name?: string;

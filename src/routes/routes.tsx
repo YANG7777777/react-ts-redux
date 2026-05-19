@@ -118,16 +118,16 @@ export const BaseRoutes = [
                     icon: <FileTextOutlined />,
                 },
             },
-            {
-                path: "/attendance/overtime-request",
-                element: <OvertimeRequestPage />,
-                name: "overtimeRequest",
-                meta: {
-                    hidden: false,
-                    title: "加班申请",
-                    icon: <PlusCircleOutlined />,
-                },
-            },
+            // {
+            //     path: "/attendance/overtime-request",
+            //     element: <OvertimeRequestPage />,
+            //     name: "overtimeRequest",
+            //     meta: {
+            //         hidden: false,
+            //         title: "加班申请",
+            //         icon: <PlusCircleOutlined />,
+            //     },
+            // },
         ],
     },
     // {

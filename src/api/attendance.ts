@@ -49,6 +49,8 @@ export interface LeaveRequestResponse {
   start_date: string;
   end_date: string;
   reason?: string;
+  approver_id?: number;
+  approver_name?: string;
   status: number;
   created_at: string;
   updated_at: string;
@@ -79,12 +81,33 @@ export interface AddLeaveRequestParams {
   start_date: string;
   end_date: string;
   reason?: string;
+  approver_id: number;
 }
 
 export const addLeaveRequest = async (params: AddLeaveRequestParams): Promise<void> => {
   await request.post('/leave-applications/add', params);
 };
 
+// 获取审批人列表
+export interface ApproverResponse {
+  id: number;
+  name: string;
+}
+
+export const getApproverList = async (): Promise<ApproverResponse[]> => {
+  const response = await request.get<ApproverResponse[]>('/employees/admins');
+  return response.data;
+};
+
+// 审批请假申请
+export interface ApproveLeaveRequestParams {
+  id: number;
+  status: number; // 1 同意, 2 拒绝
+}
+
+export const approveLeaveRequest = async (id: number, status: number): Promise<void> => {
+  await request.post(`/leave-applications/approve/${id}`, { status });
+};
 
 
 export interface OvertimeRequestParams {

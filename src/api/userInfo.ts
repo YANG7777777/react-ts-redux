@@ -15,6 +15,7 @@ export interface UserInfoResponse {
   status: number;
   created_at: string;
   updated_at: string;
+  approver_id?: number;
 }
 
 export interface UserInfoListResponse {
@@ -42,6 +43,7 @@ export interface UserInfoFormData {
   phone?: string;
   birthday?: Dayjs | string | null;
   status?: number;
+  approver_id?: number;
 }
 
 export const getUserInfoList = async (params: UserInfoParams = {}): Promise<UserInfoListResponse> => {
@@ -66,4 +68,9 @@ export const updateUserInfo = async (id: number, data: UserInfoFormData): Promis
 
 export const deleteUserInfo = async (id: number): Promise<void> => {
   await request.delete(`/employees/delete/${id}`);
+};
+
+export const getLeaderList = async (): Promise<UserInfoResponse[]> => {
+  const response = await request.get<UserInfoResponse[]>('/employees/admins');
+  return response.data;
 };

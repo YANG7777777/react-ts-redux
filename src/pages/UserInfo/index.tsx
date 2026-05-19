@@ -6,7 +6,7 @@ import styles from "./userInfo.module.scss";
 import CommonTable from "@/components/CommonTable";
 import CommonForm from "@/components/CommonForm";
 import CommonTitle from "@/components/CommonTitle";
-import { getUserInfoList, UserInfoResponse, UserInfoParams, UserInfoFormData, createUserInfo, updateUserInfo, deleteUserInfo } from "@/api/userInfo";
+import { getUserInfoList, UserInfoResponse, UserInfoParams, UserInfoFormData, createUserInfo, updateUserInfo, deleteUserInfo, getLeaderList } from "@/api/userInfo";
 import { getDepartmentList, DepartmentResponse } from "@/api/department";
 import { getRoleList, RoleResponse } from "@/api/role";
 
@@ -42,20 +42,21 @@ const UserInfoPage = () => {
   const [searchParams, setSearchParams] = useState<FormType>({});
   const [pagination, setPagination] = useState<PaginationState>({
     current: 1,
-    pageSize: 10,
-    total: 0,
+    pageSize: 10, total: 0,
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<DataType | null>(null);
   const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [roles, setRoles] = useState<RoleResponse[]>([]);
+  const [leaders, setLeaders] = useState<UserInfoResponse[]>([]);
 
   const positions = ['经理', '主管', '工程师', '设计师', '专员'];
 
   useEffect(() => {
     fetchDepartments();
     fetchRoles();
+    fetchLeaders();
   }, []);
 
   const fetchDepartments = async () => {
@@ -75,6 +76,15 @@ const UserInfoPage = () => {
       setRoles(res);
     } catch (error) {
       console.error('获取角色列表失败:', error);
+    }
+  };
+
+  const fetchLeaders = async () => {
+    try {
+      const res = await getLeaderList();
+      setLeaders(res);
+    } catch (error) {
+      console.error('获取上级领导人列表失败:', error);
     }
   };
 
@@ -115,6 +125,7 @@ const UserInfoPage = () => {
       phone: record.phone,
       birthday: record.birthday ? dayjs.utc(record.birthday).local() : undefined,
       status: record.status ? 1 : 0,
+      approver_id: record.approver_id,
     });
     setModalVisible(true);
   };
@@ -279,6 +290,12 @@ const UserInfoPage = () => {
       width: 150,
     },
     {
+      title: "上级",
+      dataIndex: "approver_name",
+      key: "approver_name",
+      width: 120,
+    },
+    {
       title: "状态",
       dataIndex: "status",
       key: "status",
@@ -412,6 +429,16 @@ const UserInfoPage = () => {
             <Select placeholder="请选择角色" allowClear>
               {roles.map(role => (
                 <Select.Option key={role.id} value={role.id}>{role.role_name}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item<UserInfoFormData>
+            name="approver_id"
+            label="上级领导人"
+          >
+            <Select placeholder="请选择上级领导人" allowClear>
+              {leaders.map(leader => (
+                <Select.Option key={leader.id} value={leader.id}>{leader.name}</Select.Option>
               ))}
             </Select>
           </Form.Item>

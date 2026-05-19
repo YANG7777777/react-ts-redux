@@ -3,7 +3,7 @@ import { Space, Form, Input, Button, message, Modal, Select, DatePicker } from "
 import styles from "../attendance.module.scss";
 import CommonTable from "@/components/CommonTable";
 import CommonForm from "@/components/CommonForm";
-import { getLeaveRequestList, LeaveRequestParams, LeaveRequestResponse, deleteLeaveRequest, addLeaveRequest, AddLeaveRequestParams } from "@/api/attendance";
+import { getLeaveRequestList, LeaveRequestParams, LeaveRequestResponse, deleteLeaveRequest, addLeaveRequest, AddLeaveRequestParams, getApproverList, ApproverResponse, approveLeaveRequest } from "@/api/attendance";
 import CommonTitle from "@/components/CommonTitle";
 import dayjs from 'dayjs';
 import { useSelector } from 'react-redux';
@@ -24,6 +24,7 @@ interface AddLeaveFormType {
   start_date: dayjs.Dayjs;
   end_date: dayjs.Dayjs;
   reason?: string;
+  approver_id: number;
 }
 
 interface PaginationState {
@@ -59,8 +60,22 @@ const LeaveRequestPage = () => {
     pageSize: 10,
     total: 0,
   });
+  const [approvers, setApprovers] = useState<ApproverResponse[]>([]);
 
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+
+  useEffect(() => {
+    fetchApprovers();
+  }, []);
+
+  const fetchApprovers = async () => {
+    try {
+      const res = await getApproverList();
+      setApprovers(res);
+    } catch (error) {
+      console.error('获取审批人列表失败:', error);
+    }
+  };
 
   const onLeaveRequestDelete = (record: DataType) => {
     Modal.confirm({
@@ -76,6 +91,26 @@ const LeaveRequestPage = () => {
         } catch (error) {
           console.error('删除请假申请失败:', error);
           message.error('删除失败');
+        }
+      },
+    });
+  };
+
+  const handleApprove = async (record: DataType, status: number) => {
+    const actionText = status === 1 ? '同意' : '拒绝';
+    Modal.confirm({
+      title: `确认${actionText}`,
+      content: `确定要${actionText} "${record.employee_name}" 的请假申请吗？`,
+      okText: '确认',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await approveLeaveRequest(record.id, status);
+          message.success(`${actionText}成功`);
+          fetchLeaveRequestList(searchParams);
+        } catch (error) {
+          console.error(`${actionText}失败:`, error);
+          message.error(`${actionText}失败`);
         }
       },
     });
@@ -144,6 +179,7 @@ const LeaveRequestPage = () => {
         start_date: values.start_date.format('YYYY-MM-DD'),
         end_date: values.end_date.format('YYYY-MM-DD'),
         reason: values.reason,
+        approver_id: values.approver_id,
       };
       await addLeaveRequest(params);
       message.success('申请成功');
@@ -194,6 +230,12 @@ const LeaveRequestPage = () => {
       width: 200,
     },
     {
+      title: "审批人",
+      dataIndex: "approver_name",
+      key: "approver_name",
+      width: 120,
+    },
+    {
       title: "状态",
       dataIndex: "status",
       key: "status",
@@ -214,10 +256,16 @@ const LeaveRequestPage = () => {
       key: "action",
       render: (_: any, record: DataType) => (
         <Space size="middle">
+          {record.status === 0 && (
+            <>
+              <Button onClick={() => handleApprove(record, 1)} type="primary" variant="text">同意</Button>
+              <Button onClick={() => handleApprove(record, 2)} color="danger" variant="text">拒绝</Button>
+            </>
+          )}
           <Button onClick={() => onLeaveRequestDelete(record)} color="danger" variant="text">删除</Button>
         </Space>
       ),
-      width: 120,
+      width: 200,
     },
   ];
 
@@ -298,7 +346,6 @@ const LeaveRequestPage = () => {
             label="请假类型"
             rules={[{ required: true, message: '请选择请假类型' }]}
           >
-            
             <Select placeholder="请选择请假类型">
               <Select.Option value={0}>事假</Select.Option>
               <Select.Option value={1}>病假</Select.Option>
@@ -323,6 +370,18 @@ const LeaveRequestPage = () => {
             rules={[{ required: true, message: '请选择结束日期' }]}
           >
             <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item<AddLeaveFormType>
+            name="approver_id"
+            label="审批人"
+            rules={[{ required: true, message: '请选择审批人' }]}
+          >
+            <Select placeholder="请选择审批人">
+              {approvers.map(approver => (
+                <Select.Option key={approver.id} value={approver.id}>{approver.name}</Select.Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item<AddLeaveFormType>

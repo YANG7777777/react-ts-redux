@@ -235,7 +235,7 @@ const UsersPage = () => {
       render: (_: any, record: DataType) => (
         <Space size="middle">
           <Button onClick={() => onUserEdit(record)} color="primary" variant="text">编辑</Button>
-          <Button onClick={() => onUserDelete(record)} disabled={record.id === 1} color="danger" variant="text">删除</Button>
+          {/* <Button onClick={() => onUserDelete(record)} disabled={record.id === 1} color="danger" variant="text">删除</Button> */}
         </Space>
       ),
       width: 280,

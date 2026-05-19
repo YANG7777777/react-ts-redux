@@ -3,30 +3,69 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f0f2f5;
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+  background: url('/src/assets/images/login_bg.png') no-repeat center center;
+  background-size: cover;
 }
 
 .loginCard {
   width: 100%;
-  max-width: 400px;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  max-width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+  position: relative;
+  z-index: 10;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .loginHeader {
   text-align: center;
+  padding: 30px 24px 0;
+}
+
+.systemLogo {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.systemName {
+  font-size: 14px;
+  color: #8c8c8c;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .loginTitle {
   margin-bottom: 0;
-  color: #1890ff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 28px !important;
+  font-weight: 600 !important;
 }
 
 .loginForm {
-  padding: 0 24px 24px;
+  padding: 20px 32px 32px;
 }
 
 .loginButtonContainer {
-  margin-top: 24px;
+  margin-top: 28px;
 }

@@ -1,5 +1,5 @@
 import { Form, Input, Button, Card, Typography, Divider, message } from 'antd';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -114,7 +114,10 @@ const LoginPage = () => {
     <div className={styles.loginContainer}>
       <Card className={styles.loginCard}>
         <div className={styles.loginHeader}>
-          <Title level={2} className={styles.loginTitle}>登录</Title>
+          <div className={styles.systemLogo}>
+            <TeamOutlined />
+          </div>
+          <div className={styles.systemName}>员工管理系统</div>
           <Divider />
         </div>
         <Form

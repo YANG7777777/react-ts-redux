@@ -1,30 +1,38 @@
 import request from '../utils/request';
+import type { PageParams, PageResult } from './types';
 
-export interface UserParams {
-  userName?: string;
+export interface UserParams extends PageParams {
+  /** 登录名 */
+  username?: string;
+  /** 用户名（员工姓名） */
+  employee_name?: string;
   id?: number;
-  current?: number;
-  pageSize?: number;
+  role?: number;
 }
 
 export interface UserResponse {
   id: number;
+  /** 登录名 */
   username: string;
   email: string;
-  address: string;
-  role?: string;
+  address?: string;
+  role?: string | number;
+  role_name?: string;
+  employee_id?: number | null;
+  /** 用户名（关联员工姓名） */
+  employee_name?: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface UserListResponse {
-  list: UserResponse[];
-  total: number;
-}
+export type UserListResponse = PageResult<UserResponse>;
 
 export const getUserList = async (params: UserParams = {}): Promise<UserListResponse> => {
-  const response = await request.get<UserListResponse>('/users/all', params);
-  return response.data as unknown as UserListResponse;
+  const response = await request.get<UserListResponse>(
+    '/users/all',
+    params as Record<string, unknown>
+  );
+  return response.data;
 };
 
 export const deleteUser = async (id: number): Promise<void> => {
@@ -32,11 +40,12 @@ export const deleteUser = async (id: number): Promise<void> => {
 };
 
 export interface UserFormData {
+  /** 登录名 */
   username?: string;
   email?: string;
   address?: string;
   password?: string;
-  role?: string;
+  role?: string | number;
 }
 
 export const createUser = async (data: UserFormData): Promise<UserResponse> => {

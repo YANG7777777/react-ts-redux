@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Space, Form, Input, Button, message, Modal, Select, Card, TreeSelect, DatePicker } from "antd";
+import { Space, Form, Input, Button, message, Modal, Select, TreeSelect, DatePicker } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import styles from "./userInfo.module.scss";
@@ -46,7 +46,6 @@ const UserInfoPage = () => {
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<DataType | null>(null);
-  const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [roles, setRoles] = useState<RoleResponse[]>([]);
   const [leaders, setLeaders] = useState<UserInfoResponse[]>([]);
@@ -62,11 +61,10 @@ const UserInfoPage = () => {
   const fetchDepartments = async () => {
     try {
       const res = await getDepartmentList();
-      setDepartments(res.list);
       const tree = buildTreeData(res.list);
       setTreeData(tree);
     } catch (error) {
-      console.error('获取部门列表失败:', error);
+      message.error(error instanceof Error ? error.message : '获取部门列表失败');
     }
   };
 
@@ -124,7 +122,7 @@ const UserInfoPage = () => {
       email: record.email,
       phone: record.phone,
       birthday: record.birthday ? dayjs.utc(record.birthday).local() : undefined,
-      status: record.status ? 1 : 0,
+      status: Number(record.status) === 1 ? 1 : 0,
       approver_id: record.approver_id,
     });
     setModalVisible(true);
@@ -143,8 +141,23 @@ const UserInfoPage = () => {
         await updateUserInfo(editingEmployee.id, submitData);
         message.success('编辑成功');
       } else {
-        await createUserInfo(submitData);
-        message.success('添加成功');
+        const created = await createUserInfo(submitData);
+        if (created?.initial_password) {
+          Modal.success({
+            title: '员工创建成功',
+            content: (
+              <div>
+                <p>已自动创建登录账号：{created.username || created.email}</p>
+                <p>
+                  初始密码：<strong>{created.initial_password}</strong>
+                </p>
+                <p style={{ color: '#999', marginBottom: 0 }}>请妥善保存，关闭后将无法再次查看。</p>
+              </div>
+            ),
+          });
+        } else {
+          message.success('添加成功');
+        }
       }
       setModalVisible(false);
       modalForm.resetFields();
@@ -200,7 +213,7 @@ const UserInfoPage = () => {
         total: res.total,
       }));
     } catch (error) {
-      console.error('获取员工列表失败:', error);
+      message.error(error instanceof Error ? error.message : '获取员工列表失败');
     } finally {
       setLoading(false);
     }
@@ -216,11 +229,6 @@ const UserInfoPage = () => {
       ...prev,
       current: 1,
     }));
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('表单验证失败:', errorInfo);
-    message.error('请检查表单填写！');
   };
 
   const handlePaginationChange = (page: number, pageSize: number) => {
@@ -250,6 +258,8 @@ const UserInfoPage = () => {
       dataIndex: "department_name",
       key: "department_name",
       width: 120,
+      render: (_: string, record: DataType) =>
+        record.department_name || record.department || '-',
     },
     {
       title: "职位",
@@ -261,13 +271,15 @@ const UserInfoPage = () => {
       title: "角色",
       dataIndex: "role_code",
       key: "role_code",
-      render: (text: number) => {
-        const roleMap: Record<number, string> = {
-          0: '超管',
-          1: '管理员',
-          2: '员工',
+      render: (text: string | number, record: DataType) => {
+        const role = roles.find((r) => r.id === record.role_id || String(r.role_code) === String(text));
+        if (role) return role.role_name;
+        const roleMap: Record<string, string> = {
+          '0': '超管',
+          '1': '管理员',
+          '2': '员工',
         };
-        return <a>{roleMap[text] ?? '未知'}</a>;
+        return roleMap[String(text)] ?? '未知';
       },
       width: 120,
     },
@@ -282,6 +294,7 @@ const UserInfoPage = () => {
       dataIndex: "birthday",
       key: "birthday",
       width: 200,
+      render: (text?: string) => text || '-',
     },
     {
       title: "电话",
@@ -294,13 +307,14 @@ const UserInfoPage = () => {
       dataIndex: "approver_name",
       key: "approver_name",
       width: 120,
+      render: (text?: string) => text || '-',
     },
     {
       title: "状态",
       dataIndex: "status",
       key: "status",
       render: (text: number) => (
-        <span className={text === 1 ? 'status-active' : 'status-inactive'}>
+        <span className={text === 1 ? styles['status-active'] : styles['status-inactive']}>
           {text === 1 ? '在职' : '离职'}
         </span>
       ),
@@ -336,26 +350,25 @@ const UserInfoPage = () => {
           form={form}
           layout="inline"
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           className={styles.searchForm}
         >
           <Form.Item<FormType>
             name="name"
             label="员工姓名"
           >
-            <Input placeholder="请输入员工姓名" />
+            <Input placeholder="请输入员工姓名" allowClear />
           </Form.Item>
 
           <Form.Item<FormType>
             name="id"
             label="员工ID"
           >
-            <Input placeholder="请输入员工ID" />
+            <Input placeholder="请输入员工ID" allowClear />
           </Form.Item>
 
           <Form.Item className={styles.searchItem}>
             <Button type="primary" htmlType="submit">搜索</Button>
-            <Button style={{ marginLeft: 8 }} onClick={() => {
+            <Button onClick={() => {
               form.resetFields();
               setSearchParams({});
               setPagination((prev) => ({ ...prev, current: 1 }));
@@ -366,6 +379,7 @@ const UserInfoPage = () => {
 
       <div className={styles.tableBox}>
         <CommonTable<DataType>
+          fillHeight
           columns={columns}
           dataSource={data}
           loading={loading}

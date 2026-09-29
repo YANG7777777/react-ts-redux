@@ -42,7 +42,7 @@ const OvertimeRequestPage = () => {
   const onOvertimeRequestDelete = (record: DataType) => {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除加班申请 "${record.user_name}" 吗？`,
+      content: `确定要删除加班申请 "${record.employee_name || record.user_name}" 吗？`,
       okText: '确认',
       cancelText: '取消',
       onOk: async () => {
@@ -76,7 +76,7 @@ const OvertimeRequestPage = () => {
         total: res.total,
       }));
     } catch (error) {
-      console.error('获取加班申请列表失败:', error);
+      message.error(error instanceof Error ? error.message : '获取加班申请列表失败');
     } finally {
       setLoading(false);
     }
@@ -86,17 +86,12 @@ const OvertimeRequestPage = () => {
     fetchOvertimeRequestList(searchParams);
   }, [pagination.current, pagination.pageSize, searchParams]);
 
-  const onFinish = async (values: FormType) => {
+  const onFinish = (values: FormType) => {
     setSearchParams(values);
     setPagination((prev) => ({
       ...prev,
       current: 1,
     }));
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('表单验证失败:', errorInfo);
-    message.error('请检查表单填写！');
   };
 
   const handlePaginationChange = (page: number, pageSize: number) => {
@@ -116,9 +111,10 @@ const OvertimeRequestPage = () => {
     },
     {
       title: "员工姓名",
-      dataIndex: "user_name",
-      key: "user_name",
+      dataIndex: "employee_name",
+      key: "employee_name",
       width: 120,
+      render: (_: unknown, record: DataType) => record.employee_name || record.user_name,
     },
     {
       title: "加班日期",
@@ -148,11 +144,15 @@ const OvertimeRequestPage = () => {
       title: "状态",
       dataIndex: "status",
       key: "status",
-      render: (text: number) => (
-        <span className={text === 1 ? 'status-active' : text === 2 ? 'status-inactive' : 'status-pending'}>
-          {statusMap[text] || '未知'}
-        </span>
-      ),
+      render: (text: number) => {
+        const className =
+          text === 1
+            ? styles['status-active']
+            : text === 2
+              ? styles['status-inactive']
+              : styles['status-pending'];
+        return <span className={className}>{statusMap[text] || '未知'}</span>;
+      },
       width: 100,
     },
     {
@@ -163,9 +163,9 @@ const OvertimeRequestPage = () => {
     {
       title: "操作",
       key: "action",
-      render: (_: any, record: DataType) => (
+      render: (_: unknown, record: DataType) => (
         <Space size="middle">
-          <Button onClick={() => onOvertimeRequestDelete(record)} color="danger" variant="text">删除</Button>
+          <Button onClick={() => onOvertimeRequestDelete(record)} type="link" danger>删除</Button>
         </Space>
       ),
       width: 120,
@@ -176,12 +176,11 @@ const OvertimeRequestPage = () => {
     <div className={styles.attendance}>
       <CommonTitle title="加班申请"></CommonTitle>
 
-      <div className={styles.searchBox} style={{ marginBottom: 20 }}>
+      <div className={styles.searchBox}>
         <CommonForm<FormType>
           form={form}
           layout="inline"
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           className={styles.searchForm}
         >
           <Form.Item<FormType>
@@ -215,6 +214,7 @@ const OvertimeRequestPage = () => {
 
       <div className={styles.tableBox}>
         <CommonTable<DataType>
+          fillHeight
           columns={columns}
           dataSource={data}
           loading={loading}

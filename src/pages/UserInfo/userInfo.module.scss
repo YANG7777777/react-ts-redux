@@ -1,33 +1,58 @@
 .userInfo {
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  min-height: 0;
+  padding: 20px;
+  background: #f5f7fa;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  > :global(*) {
+    flex-shrink: 0;
+  }
 }
 
 .searchBox {
-  margin: 20px 0;
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .searchForm {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 8px 0;
 }
 
 .searchItem {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 
 .tableBox {
+  flex: 1;
+  flex-shrink: 1 !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border-radius: 8px;
   padding: 16px;
-  height: calc(100% - 106px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 .status-active {
   color: #52c41a;
+  font-weight: 500;
 }
 
 .status-inactive {
-  color: #f5222d;
+  color: #ff4d4f;
+  font-weight: 500;
 }

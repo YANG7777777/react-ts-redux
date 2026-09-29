@@ -8,15 +8,15 @@ export interface RoleParams {
 export interface RoleResponse {
   id: number;
   role_name: string;
-  role_type: number;
-  role_code: string;
+  role_type?: number;
+  role_code: string | number;
   created_at: string;
   updated_at: string;
 }
 
 export const getRoleList = async (params: RoleParams = {}): Promise<RoleResponse[]> => {
-  const response = await request.get<RoleResponse[]>('/roles/all', params);
-  return response.data as unknown as RoleResponse[];
+  const response = await request.get<RoleResponse[]>('/roles/all', params as Record<string, unknown>);
+  return response.data;
 };
 
 export const deleteRole = async (id: number): Promise<void> => {
@@ -25,7 +25,7 @@ export const deleteRole = async (id: number): Promise<void> => {
 
 export interface RoleFormData {
   role_name?: string;
-  role_code?: number;
+  role_code?: string | number;
 }
 
 export const createRole = async (data: RoleFormData): Promise<RoleResponse> => {

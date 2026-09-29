@@ -1,31 +1,50 @@
 .attendance {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
   padding: 20px;
-  background: #f5f5f5;
-  min-height: calc(100vh - 90px);
+  background: #f5f7fa;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  > :global(*) {
+    flex-shrink: 0;
+  }
 }
 
 .searchBox {
   background: #fff;
-  padding: 20px;
+  padding: 16px 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .searchForm {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 8px 0;
 }
 
 .searchItem {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 
 .tableBox {
-  // background: #fff;
+  flex: 1;
+  flex-shrink: 1 !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  height: calc(100vh - 279px);
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 .status-active {

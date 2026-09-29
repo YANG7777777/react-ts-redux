@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card, Typography, Divider, message } from 'antd';
+import { Form, Input, Button, Card, Divider, message } from 'antd';
 import { LockOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,102 +8,64 @@ import { login } from '../../api/login';
 import type { LoginParams } from '../../api/login';
 import { encryptRSA, fetchAndSetPublicKey } from '../../utils/encrypt';
 import { loginSuccess } from '../../store/features/authSlice';
-import { store } from '../../store';
-
-const { Title } = Typography;
-
-// 定义RootState类型
-type RootState = ReturnType<typeof store.getState>;
+import type { RootState } from '../../store';
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingKey, setFetchingKey] = useState(true);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
-  // 从Redux store获取认证状态
-  const { token, isAuthenticated } = useSelector((state: RootState) => {
-    // 处理类型安全，确保state.auth存在
-    return (state as any).auth || { token: null, isAuthenticated: false };
-  });
-  
-  // 组件加载时获取公钥
+  const { token, isAuthenticated } = useSelector((state: RootState) => state.auth);
+
   useEffect(() => {
     const fetchKey = async () => {
       try {
         await fetchAndSetPublicKey();
-      } catch (error) {
-        console.error('获取公钥失败:', error);
+      } catch {
         message.error('获取公钥失败，请刷新页面重试');
       } finally {
         setFetchingKey(false);
       }
     };
-
     fetchKey();
   }, []);
-  
-  // 检查认证状态，已认证则重定向到首页
+
   useEffect(() => {
-    // 延迟检查，给Redux Persist时间恢复状态
-    const timer = setTimeout(() => {
-      const hasValidToken = token && isAuthenticated;
-      if (hasValidToken) {
-        // 已认证，重定向到首页
-        navigate('/home', { replace: true });
-      }
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    if (token && isAuthenticated) {
+      navigate('/home', { replace: true });
+    }
   }, [token, isAuthenticated, navigate]);
 
   const onFinish = async (values: LoginParams) => {
     setLoading(true);
     try {
-      // 这里可以添加登录逻辑
-      console.log('Login values:', values);
-      
-      // 检查密码长度并截断到最大72字节
       let password = values.password;
       const maxPasswordLength = 72;
-      
-      // 计算密码的字节长度（考虑多字节字符）
       const passwordByteLength = new Blob([password]).size;
-      
+
       if (passwordByteLength > maxPasswordLength) {
-        console.warn(`密码超过${maxPasswordLength}字节，将截断`);
-        // 截断密码
         let truncatedPassword = password;
         while (new Blob([truncatedPassword]).size > maxPasswordLength && truncatedPassword.length > 0) {
           truncatedPassword = truncatedPassword.slice(0, -1);
         }
         password = truncatedPassword;
-        console.log('截断后的密码:', password);
       }
-      
-      // 对密码进行RSA加密
-      const encryptedValues = {
+
+      const data = await login({
         ...values,
-        password: encryptRSA(password)
-      };
-      console.log('Encrypted values:', encryptedValues);
-      
-      // 使用新的login API接口
-      const data = await login(encryptedValues);
-      console.log('Login success:', data);
-      
-      // 将token和用户信息保存到Redux store
-      dispatch(loginSuccess({
-        token: data.token,
-        userInfo: data.userInfo
-      }));
-      
-      // 登录成功后的处理
+        password: encryptRSA(password),
+      });
+
+      dispatch(
+        loginSuccess({
+          token: data.token,
+          userInfo: data.userInfo,
+        })
+      );
+
       message.success('登录成功');
-      // 跳转到首页
       navigate('/home');
     } catch (error) {
-      console.error('Login failed:', error);
       message.error(error instanceof Error ? error.message : '登录失败');
     } finally {
       setLoading(false);
@@ -120,35 +82,21 @@ const LoginPage = () => {
           <div className={styles.systemName}>员工管理系统</div>
           <Divider />
         </div>
-        <Form
-          name="login"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          autoComplete="off"
-          className={styles.loginForm}
-        >
-          <Form.Item
-            name="username"
-            rules={[{ required: true, message: '请输入用户名!' }]}
-          >
-            <Input
-              prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="用户名"
-            />
+        <Form name="login" onFinish={onFinish} autoComplete="off" className={styles.loginForm}>
+          <Form.Item name="username" rules={[{ required: true, message: '请输入用户名!' }]}>
+            <Input prefix={<UserOutlined />} placeholder="用户名" />
           </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: '请输入密码!' }]}
-          >
-            <Input
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              type="password"
-              placeholder="密码"
-            />
+          <Form.Item name="password" rules={[{ required: true, message: '请输入密码!' }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder="密码" />
           </Form.Item>
-
           <Form.Item className={styles.loginButtonContainer}>
-            <Button type="primary" htmlType="submit" loading={loading || fetchingKey} disabled={fetchingKey} block>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading || fetchingKey}
+              disabled={fetchingKey}
+              block
+            >
               {fetchingKey ? '加载中...' : '登录'}
             </Button>
           </Form.Item>

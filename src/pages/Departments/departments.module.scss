@@ -1,82 +1,149 @@
 .departments {
-  padding: 0 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  .searchBox {
-    padding-top: 16px;
-    width: 100%;
-    .searchForm {
-      width: 100%;
-      .searchItem {
-        margin-left: auto;
-        margin-right: 0;
-      }
+  min-height: 0;
+  padding: 20px;
+  background: #f5f7fa;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.layout {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 8px;
+  align-items: stretch;
+}
+
+.treePanel {
+  width: 280px;
+  flex-shrink: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  .treeCard {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+
+    :global(.ant-card-body) {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
     }
   }
+}
 
-  .layout {
+.contentPanel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rightStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.detailCard,
+.memberCard,
+.emptyCard {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.detailCard {
+  flex-shrink: 0;
+}
+
+.memberCard {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  :global(.ant-card-body) {
+    flex: 1;
+    min-height: 0;
     display: flex;
-    gap: 20px;
-    height: calc(100% - 106px);
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+.emptyCard {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detailInfo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+}
+
+.detailRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detailLabel {
+  flex-shrink: 0;
+  min-width: 64px;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.detailValue {
+  color: #262626;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.deleteTip {
+  margin-left: 8px;
+  color: #999;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.memberHint {
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.emptyTip {
+  color: #999;
+  font-size: 14px;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    flex-direction: column;
   }
 
   .treePanel {
-    width: 300px;
-    flex-shrink: 0;
-    .treeCard {
-      height: 100%;
-    }
-  }
-
-  .contentPanel {
-    flex: 1;
-    .detailCard {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .emptyCard {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    width: 100%;
   }
 
   .detailInfo {
-    flex: 1;
-  }
-
-  .detailRow {
-    display: flex;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .detailLabel {
-    font-weight: 500;
-    min-width: 100px;
-    color: #666;
-  }
-
-  .detailValue {
-    color: #333;
-  }
-
-  .detailActions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-
-  .deleteTip {
-    margin-left: 8px;
-    color: #999;
-    font-size: 12px;
-  }
-
-  .emptyTip {
-    color: #999;
-    font-size: 14px;
+    grid-template-columns: 1fr;
   }
 }

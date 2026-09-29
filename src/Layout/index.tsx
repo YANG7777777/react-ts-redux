@@ -1,94 +1,78 @@
-// 在父路由组件中，<Outlet> 会动态渲染当前匹配的子路由对应的组件。
-// 允许父路由定义共享布局（如导航栏、侧边栏），子路由内容通过 <Outlet> 插入到布局中的指定位置。
-import {Outlet, useLocation} from 'react-router-dom';
-import {UserOutlined} from '@ant-design/icons';
-/**
- * 从 Redux store 中获取状态：允许组件订阅 Redux store 的特定部分（state），并在状态变化时自动重新渲染。
- * 支持复杂的选择逻辑：可以传入一个 选择器函数（selector function），用于计算派生数据（derived data）。
- * 获取 dispatch 函数：允许组件直接调用 Redux 的 dispatch 方法，派发 actions 到 store。
- * 触发状态更新：通过派发 actions（通常是普通对象或由 redux-thunk 等中间件处理的函数），修改 Redux 的全局状态。
- */
-import {useSelector, useDispatch} from 'react-redux';
-
-import {Avatar, Dropdown} from 'antd';
-import type {MenuProps} from 'antd';
-import {logout} from '../store/features/authSlice.ts';
-import LeftMenu from './LeftMenu.tsx';
-
-
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { UserOutlined } from '@ant-design/icons';
+import { useSelector, useDispatch } from 'react-redux';
+import { Avatar, Dropdown, message } from 'antd';
+import type { MenuProps } from 'antd';
+import { logout as logoutAction } from '../store/features/authSlice';
+import { logout as logoutApi } from '../api/login';
+import { setToken } from '../utils/request';
+import LeftMenu from './LeftMenu';
+import TagsNav from './TagsNav';
+import type { RootState } from '../store';
 import styles from './index.module.scss';
 
 const Index = () => {
-    const user = useSelector((state: any) => state.auth);
-    const collapsed = useSelector((state: any) => state.counter.menuCollapsed);
-    const location = useLocation();
-    const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth);
+  const collapsed = useSelector((state: RootState) => state.counter.menuCollapsed);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    const items: MenuProps['items'] = [
-        {
-            key: 'logout',
-            label: '退出登录',
-        },
-    ];
+  const items: MenuProps['items'] = [
+    {
+      key: 'logout',
+      label: '退出登录',
+    },
+  ];
 
-    const handleMenuClick: MenuProps['onClick'] = (e) => {
-        if (e.key === 'logout') {
-            try {
-                logout();
-                // 清空用户信息
-                dispatch(logout());
-                console.log('退出登录成功');
-            } catch (error) {
-                console.error('退出登录失败:', error);
-            }
-        }
-    };
+  const handleMenuClick: MenuProps['onClick'] = async (e) => {
+    if (e.key !== 'logout') return;
+    try {
+      await logoutApi();
+    } catch {
+      // 接口失败也继续清理本地登录态
+    } finally {
+      setToken(null);
+      dispatch(logoutAction());
+      message.success('已退出登录');
+      navigate('/login', { replace: true });
+    }
+  };
 
-    const menuProps = {
-        items,
-        onClick: handleMenuClick,
-    };
-
-
-
-    return (
-        <div className={styles.appContainer}>
-            <header className={styles.header}>
-                <div className={styles.logo}>后台管理系统</div>
-                <div className={styles.user}>
-                    <Dropdown
-                        menu={menuProps}
-                        trigger={['click']}
-                    >
-                        <div>
-                            <Avatar icon={<UserOutlined/>}></Avatar>
-                            {user.userInfo?.username}
-                        </div>
-                    </Dropdown>
-                </div>
-            </header>
-
-            <div className={styles.mainArea}>
-                {/* 左侧菜单 */}
-                <LeftMenu/>
-
-                {/* 右侧内容区域 */}
-                <main className={styles.content}>
-                    <div 
-                        className={styles.pageWrapper}
-                        key={location.pathname}
-                    >
-                        <Outlet/>
-                    </div>
-                </main>
+  return (
+    <div className={styles.appContainer}>
+      <header className={styles.header}>
+        <div className={styles.logo}>后台管理系统</div>
+        <div className={styles.user}>
+          <Dropdown menu={{ items, onClick: handleMenuClick }} trigger={['click']}>
+            <div className={styles.userTrigger}>
+              <Avatar
+                size="small"
+                icon={<UserOutlined />}
+                style={{ backgroundColor: '#e6f4ff', color: '#1677ff' }}
+              />
+              <span>{user.userInfo?.username}</span>
             </div>
-
-            <footer className={styles.footer}>
-                <div className={styles.animation} style={{width: collapsed ? '80px' : '200px'}}></div>
-                <div className={styles.footerContent}>© 2025 后台管理系统</div>
-            </footer>
+          </Dropdown>
         </div>
-    );
-}
+      </header>
+
+      <div className={styles.mainArea}>
+        <LeftMenu />
+        <main className={styles.content}>
+          <TagsNav />
+          <div className={styles.pageWrapper} key={location.pathname}>
+            <Outlet />
+          </div>
+        </main>
+      </div>
+
+      <footer className={styles.footer}>
+        <div className={styles.animation} style={{ width: collapsed ? '80px' : '200px' }} />
+        <div className={styles.footerContent}>© 2025 后台管理系统</div>
+      </footer>
+    </div>
+  );
+};
 
 export default Index;

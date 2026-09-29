@@ -2,70 +2,90 @@
 
 interface RequestOptions extends RequestInit {
   baseURL?: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   timeout?: number;
 }
 
-// 存储token的变量
 let token: string | null = null;
 
-/**
- * 设置token
- * @param newToken token字符串
- */
+/** 401 时由外部注册的回调（清登录态并跳转） */
+let unauthorizedHandler: (() => void) | null = null;
+
 export const setToken = (newToken: string | null): void => {
   token = newToken;
 };
 
-/**
- * 获取token
- * @returns token字符串或null
- */
 export const getToken = (): string | null => {
   return token;
 };
 
-// 传统返回格式：code/message/data
-interface TraditionalResponse<T = any> {
+export const setUnauthorizedHandler = (handler: (() => void) | null): void => {
+  unauthorizedHandler = handler;
+};
+
+interface TraditionalResponse<T = unknown> {
   code: number;
   message: string;
   data: T;
 }
 
-// 新返回格式：status/message/xxx
 interface NewResponse {
-  status: "ok" | "error" | string;
+  status: 'ok' | 'error' | string;
   message: string;
-  [key: string]: any; // 支持其他字段，如public_key
+  public_key?: string;
+  data?: unknown;
+  [key: string]: unknown;
 }
 
-// 兼容两种返回格式的联合类型
-type ResponseData<T = any> = TraditionalResponse<T> | NewResponse;
+type RawResponse<T = unknown> = TraditionalResponse<T> | NewResponse;
 
-// 默认配置
+/** 开发走 Vite 代理前缀，避免直连后端的 CORS；生产可配同域反向代理路径 */
 const defaultConfig: RequestOptions = {
-  baseURL: import.meta.env.VITE_APP_API_TARGET || '',
-  timeout: parseInt(import.meta.env.VITE_REQUEST_TIMEOUT || '10000'),
+  baseURL: import.meta.env.VITE_APP_API || import.meta.env.VITE_APP_API_TARGET || '',
+  timeout: parseInt(import.meta.env.VITE_REQUEST_TIMEOUT || '10000', 10),
   headers: {
     'Content-Type': 'application/json',
   },
 };
 
-// 创建请求实例
-const request = async <T = any>(
+const handleUnauthorized = () => {
+  setToken(null);
+  unauthorizedHandler?.();
+};
+
+/** FastAPI 422 校验错误 → 可读文案 */
+const formatValidationError = (payload: unknown): string => {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    Array.isArray((payload as { detail?: unknown }).detail)
+  ) {
+    const details = (payload as { detail: Array<{ loc?: unknown[]; msg?: string }> }).detail;
+    const parts = details.map((item) => {
+      const field = Array.isArray(item.loc)
+        ? item.loc.filter((x) => x !== 'body' && x !== 'query').join('.')
+        : '';
+      return field ? `${field}: ${item.msg || '校验失败'}` : item.msg || '校验失败';
+    });
+    return parts.filter(Boolean).join('；') || '请求参数校验失败';
+  }
+  if (payload && typeof payload === 'object' && 'message' in payload) {
+    return String((payload as { message: unknown }).message);
+  }
+  return '请求失败';
+};
+
+const request = async <T = unknown>(
   url: string,
   options: RequestOptions = {}
-): Promise<ResponseData<T>> => {
+): Promise<TraditionalResponse<T>> => {
   const { baseURL = defaultConfig.baseURL, params, ...otherOptions } = options;
 
-  // 构建完整URL
   let fullUrl = `${baseURL}${url}`;
 
-  // 处理查询参数
   if (params) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      // 过滤掉 undefined、null 和空字符串
       if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, String(value));
       }
@@ -76,24 +96,24 @@ const request = async <T = any>(
     }
   }
 
-  // 处理请求体
-  if (otherOptions.body && typeof otherOptions.body === 'object' && !(otherOptions.body instanceof FormData)) {
+  if (
+    otherOptions.body &&
+    typeof otherOptions.body === 'object' &&
+    !(otherOptions.body instanceof FormData)
+  ) {
     otherOptions.body = JSON.stringify(otherOptions.body);
   }
 
-  // 请求拦截器
   const requestConfig = {
     ...defaultConfig,
     ...otherOptions,
     headers: {
       ...defaultConfig.headers,
       ...otherOptions.headers,
-      // 添加Authorization头
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
 
-  // 超时处理
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => {
       reject(new Error('请求超时'));
@@ -101,77 +121,83 @@ const request = async <T = any>(
   });
 
   try {
-    const response = await Promise.race([
+    const response = (await Promise.race([
       fetch(fullUrl, requestConfig),
       timeoutPromise,
-    ]) as Response;
+    ])) as Response;
 
-    // 检查响应状态
-    if (!response.ok) {
-      throw new Error(`HTTP错误! 状态: ${response.status}`);
+    if (response.status === 401) {
+      handleUnauthorized();
+      throw new Error('登录已过期，请重新登录');
     }
 
-    // 解析响应数据
-    const data = await response.json() as ResponseData<T>;
+    if (!response.ok) {
+      let errPayload: unknown = null;
+      try {
+        errPayload = await response.json();
+      } catch {
+        /* ignore */
+      }
+      if (response.status === 422) {
+        throw new Error(formatValidationError(errPayload));
+      }
+      throw new Error(
+        formatValidationError(errPayload) || `HTTP错误! 状态: ${response.status}`
+      );
+    }
 
-    // 响应拦截器
-    // 检查是否为传统格式 (code/message/data)
+    const data = (await response.json()) as RawResponse<T>;
+
     if ('code' in data) {
+      if (data.code === 401) {
+        handleUnauthorized();
+        throw new Error(data.message || '登录已过期，请重新登录');
+      }
       if (data.code !== 200) {
         throw new Error(data.message || '请求失败');
       }
-      return data;
+      return data as TraditionalResponse<T>;
     }
 
-    // 检查是否为新格式 (status/message/xxx)
     if ('status' in data) {
       if (data.status !== 'ok' && data.status !== '200') {
         throw new Error(data.message || '请求失败');
       }
 
-      // 针对获取公钥接口的特殊处理
       if (data.public_key) {
-        // 转换为传统格式返回
         return {
           code: 200,
           message: data.message,
-          data: data.public_key
-        } as TraditionalResponse<T>;
+          data: data.public_key as T,
+        };
       }
 
-      // 对于其他新格式，尝试提取data字段或直接返回
-      if (data.data) {
+      if ('data' in data && data.data !== undefined) {
         return {
           code: 200,
           message: data.message,
-          data: data.data
-        } as TraditionalResponse<T>;
+          data: data.data as T,
+        };
       }
 
-      // 直接返回新格式，但转换为传统格式的结构
       return {
         code: 200,
         message: data.message,
-        data: data
-      } as TraditionalResponse<T>;
+        data: data as T,
+      };
     }
 
-    // 未知格式，直接返回
-    console.warn('未知的响应格式:', data);
-    return data;
+    throw new Error('未知的响应格式');
   } catch (error) {
-    console.error('请求错误:', error);
-    // 统一错误处理
     throw error instanceof Error ? error : new Error('请求失败');
   }
 };
 
-// 封装常用方法
-request.get = <T = any>(
+request.get = <T = unknown>(
   url: string,
-  params?: Record<string, any>,
+  params?: Record<string, unknown>,
   options?: RequestOptions
-): Promise<ResponseData<T>> => {
+): Promise<TraditionalResponse<T>> => {
   return request<T>(url, {
     ...options,
     method: 'GET',
@@ -179,35 +205,35 @@ request.get = <T = any>(
   });
 };
 
-request.post = <T = any>(
+request.post = <T = unknown>(
   url: string,
-  data?: any,
+  data?: unknown,
   options?: RequestOptions
-): Promise<ResponseData<T>> => {
+): Promise<TraditionalResponse<T>> => {
   return request<T>(url, {
     ...options,
     method: 'POST',
-    body: data,
+    body: data as BodyInit,
   });
 };
 
-request.put = <T = any>(
+request.put = <T = unknown>(
   url: string,
-  data?: any,
+  data?: unknown,
   options?: RequestOptions
-): Promise<ResponseData<T>> => {
+): Promise<TraditionalResponse<T>> => {
   return request<T>(url, {
     ...options,
     method: 'PUT',
-    body: data,
+    body: data as BodyInit,
   });
 };
 
-request.delete = <T = any>(
+request.delete = <T = unknown>(
   url: string,
-  params?: Record<string, any>,
+  params?: Record<string, unknown>,
   options?: RequestOptions
-): Promise<ResponseData<T>> => {
+): Promise<TraditionalResponse<T>> => {
   return request<T>(url, {
     ...options,
     method: 'DELETE',

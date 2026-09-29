@@ -1,21 +1,27 @@
-import { useState, useEffect } from "react";
-//
-import { Space, Form, Input, Button, message, Modal, Select } from "antd";
-import styles from "./users.module.scss";
-// 通用表格组件
-import CommonTable from "@/components/CommonTable";
-// 通用表单组件
-import CommonForm from "@/components/CommonForm";
-import { getUserList, UserParams, UserResponse, deleteUser, createUser, updateUser, UserFormData } from "@/api/user";
-import { getRoleList, RoleResponse } from "@/api/role";
-import CommonTitle from "@/components/CommonTitle";
+import { useState, useEffect } from 'react';
+import { Space, Form, Input, Button, message, Modal, Select, InputNumber } from 'antd';
+import styles from './users.module.scss';
+import CommonTable from '@/components/CommonTable';
+import CommonForm from '@/components/CommonForm';
+import {
+  getUserList,
+  type UserParams,
+  type UserResponse,
+  updateUser,
+  type UserFormData,
+} from '@/api/user';
+import { getRoleList, type RoleResponse } from '@/api/role';
+import CommonTitle from '@/components/CommonTitle';
 
 interface DataType extends UserResponse {
   key: string;
 }
 
 interface FormType {
+  /** 登录名 */
   username?: string;
+  /** 用户名（员工姓名） */
+  employee_name?: string;
   id?: number;
 }
 
@@ -25,38 +31,29 @@ interface PaginationState {
   total: number;
 }
 
-// 用户列表页面
 const UsersPage = () => {
-  // 搜索表单
   const [form] = Form.useForm<FormType>();
-  // 弹窗表单
   const [modalForm] = Form.useForm<UserFormData>();
-  // 表格数据
   const [data, setData] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
-  // 搜索参数
   const [searchParams, setSearchParams] = useState<UserParams>({});
-  // 分页状态
   const [pagination, setPagination] = useState<PaginationState>({
     current: 1,
     pageSize: 10,
     total: 0,
   });
-  // 弹窗是否可见
   const [modalVisible, setModalVisible] = useState(false);
-  // 当前编辑用户
   const [editingUser, setEditingUser] = useState<DataType | null>(null);
-  // 角色列表
   const [roles, setRoles] = useState<RoleResponse[]>([]);
 
-  // 添加用户按钮
-  const onUserAdd = () => {
-    setEditingUser(null);
-    modalForm.resetFields();
-    setModalVisible(true);
+  const getRoleLabel = (role?: string | number) => {
+    if (role === undefined || role === null || role === '') return '未知';
+    const matched = roles.find((r) => String(r.role_code) === String(role));
+    if (matched) return matched.role_name;
+    const fallback: Record<string, string> = { '0': '超管', '1': '管理员', '2': '员工' };
+    return fallback[String(role)] ?? String(role);
   };
 
-  // 编辑用户按钮
   const onUserEdit = (record: DataType) => {
     setEditingUser(record);
     modalForm.setFieldsValue({
@@ -68,77 +65,42 @@ const UsersPage = () => {
     setModalVisible(true);
   };
 
-  // 确认添加/编辑用户
   const handleModalOk = async () => {
     try {
       const values = await modalForm.validateFields();
-      if (editingUser) {
-        const updateValues: UserFormData = { ...values };
-        if (!updateValues.password) {
-          delete updateValues.password;
-        }
-        await updateUser(editingUser.id, updateValues);
-        message.success('编辑成功');
-      } else {
-        await createUser(values);
-        message.success('添加成功');
+      if (!editingUser) return;
+      const updateValues: UserFormData = { ...values };
+      if (!updateValues.password) {
+        delete updateValues.password;
       }
+      await updateUser(editingUser.id, updateValues);
+      message.success('编辑成功');
       setModalVisible(false);
       modalForm.resetFields();
       fetchUserList(searchParams);
     } catch (error) {
-      console.error('操作失败:', error);
-      message.error(editingUser ? '编辑失败' : '添加失败');
+      if (error && typeof error === 'object' && 'errorFields' in error) return;
+      message.error(error instanceof Error ? error.message : '编辑失败');
     }
   };
 
-  // 取消添加/编辑用户
   const handleModalCancel = () => {
     setModalVisible(false);
     modalForm.resetFields();
   };
 
-  // 删除用户按钮
-  const onUserDelete = (record: DataType) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除用户 "${record.username}" 吗？`,
-      okText: '确认',
-      cancelText: '取消',
-      onOk: async () => {
-        try {
-          await deleteUser(record.id);
-          message.success('删除成功');
-          await fetchUserList(searchParams);
-        } catch (error) {
-          console.error('删除用户失败:', error);
-          message.error('删除失败');
-        }
-      },
-    });
-  };
-
-  // 获取用户列表
   const fetchUserList = async (params: UserParams = {}) => {
     setLoading(true);
     try {
       const res = await getUserList({
-        current: pagination.current,
+        page: pagination.current,
         pageSize: pagination.pageSize,
-        ...params
+        ...params,
       });
-
-      const formattedData = res.list.map((item) => ({
-        ...item,
-        key: String(item.id),
-      }));
-      setData(formattedData);
-      setPagination((prev) => ({
-        ...prev,
-        total: res.total,
-      }));
+      setData(res.list.map((item) => ({ ...item, key: String(item.id) })));
+      setPagination((prev) => ({ ...prev, total: res.total }));
     } catch (error) {
-      console.error('获取用户列表失败:', error);
+      message.error(error instanceof Error ? error.message : '获取用户列表失败');
     } finally {
       setLoading(false);
     }
@@ -149,152 +111,111 @@ const UsersPage = () => {
       const res = await getRoleList();
       setRoles(res);
     } catch (error) {
-      console.error('获取角色列表失败:', error);
+      message.error(error instanceof Error ? error.message : '获取角色列表失败');
     }
   };
 
   useEffect(() => {
     fetchUserList(searchParams);
-    fetchRoles();
   }, [pagination.current, pagination.pageSize, searchParams]);
 
-  // 搜索用户
-  const onFinish = async (values: FormType) => {
-    console.log('表单提交:', values);
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const onFinish = (values: FormType) => {
     setSearchParams(values);
-    setPagination((prev) => ({
-      ...prev,
-      current: 1,
-    }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('表单验证失败:', errorInfo);
-    message.error('请检查表单填写！');
-  };
-
-  // 分页改变
   const handlePaginationChange = (page: number, pageSize: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      current: page,
-      pageSize,
-    }));
+    setPagination((prev) => ({ ...prev, current: page, pageSize }));
   };
 
-  // 表格列定义
   const columns = [
+    { title: 'ID', dataIndex: 'id', key: 'id', width: 70 },
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: '用户名',
+      dataIndex: 'employee_name',
+      key: 'employee_name',
+      width: 120,
+      render: (text?: string | null) => text || <span className={styles.muted}>未关联员工</span>,
+    },
+    {
+      title: '登录名',
+      dataIndex: 'username',
+      key: 'username',
+      width: 140,
+    },
+    {
+      title: '角色',
+      dataIndex: 'role',
+      key: 'role',
       width: 100,
+      render: (text: string | number) => getRoleLabel(text),
     },
+    { title: '邮箱', dataIndex: 'email', key: 'email', width: 200, ellipsis: true },
+    { title: '创建时间', dataIndex: 'created_at', key: 'created_at', width: 170 },
+    { title: '更新时间', dataIndex: 'updated_at', key: 'updated_at', width: 170 },
     {
-      title: "用户名",
-      dataIndex: "username",
-      key: "username",
-      render: (text: string) => <a>{text}</a>,
-      width: 180,
-    },
-    {
-      title: "角色",
-      dataIndex: "role",
-      key: "role",
-      render: (text: number) => {
-        const roleMap: Record<number, string> = {
-          0: '超管',
-          1: '管理员',
-          2: '员工',
-        };
-        return <a>{roleMap[text] ?? '未知'}</a>;
-      },
-      width: 180,
-    },
-    {
-      title: "邮箱",
-      dataIndex: "email",
-      key: "email",
-      width: 280,
-    },
-    {
-      title: "创建时间",
-      dataIndex: "created_at",
-      key: "created_at",
-      // width: 8180,
-    },
-    {
-      title: "更新时间",
-      dataIndex: "updated_at",
-      key: "updated_at",
-      // width: 8180,
-    },
-    {
-      title: "操作",
-      key: "action",
-      render: (_: any, record: DataType) => (
+      title: '操作',
+      key: 'action',
+      width: 100,
+      fixed: 'right' as const,
+      render: (_: unknown, record: DataType) => (
         <Space size="middle">
-          <Button onClick={() => onUserEdit(record)} color="primary" variant="text">编辑</Button>
-          {/* <Button onClick={() => onUserDelete(record)} disabled={record.id === 1} color="danger" variant="text">删除</Button> */}
+          <Button type="link" onClick={() => onUserEdit(record)}>
+            编辑
+          </Button>
         </Space>
       ),
-      width: 280,
     },
   ];
 
   return (
     <div className={styles.users}>
-      <CommonTitle title="账号管理">
-        {/* <Button onClick={onUserAdd} type="primary" color="primary">添加用户</Button> */}
-      </CommonTitle>
+      <CommonTitle title="账号管理" />
 
-      {/* 搜索表单 */}
-      <div className={styles.searchBox} style={{ marginBottom: 20 }}>
+      <div className={styles.searchBox}>
         <CommonForm<FormType>
           form={form}
           layout="inline"
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           className={styles.searchForm}
         >
-          <Form.Item<FormType>
-            name="username"
-            label="用户名"
-          >
-            <Input placeholder="请输入用户名" />
+          <Form.Item<FormType> name="employee_name" label="用户名">
+            <Input placeholder="员工姓名" allowClear />
           </Form.Item>
-
-          <Form.Item<FormType>
-            name="id"
-            label="用户ID"
-          >
-            <Input placeholder="请输入用户ID" />
+          <Form.Item<FormType> name="username" label="登录名">
+            <Input placeholder="登录账号" allowClear />
           </Form.Item>
-
+          <Form.Item<FormType> name="id" label="账号ID">
+            <InputNumber placeholder="账号ID" style={{ width: 140 }} min={1} />
+          </Form.Item>
           <Form.Item className={styles.searchItem}>
             <Button type="primary" htmlType="submit">
               搜索
             </Button>
-            <Button style={{ marginLeft: 8 }} onClick={() => {
-              form.resetFields();
-              setSearchParams({});
-              setPagination((prev) => ({
-                ...prev,
-                current: 1,
-              }));
-            }}>
+            <Button
+              onClick={() => {
+                form.resetFields();
+                setSearchParams({});
+                setPagination((prev) => ({ ...prev, current: 1 }));
+              }}
+            >
               重置
             </Button>
           </Form.Item>
         </CommonForm>
       </div>
 
-      {/* 用户表格 */}
       <div className={styles.tableBox}>
         <CommonTable<DataType>
+          fillHeight
           columns={columns}
           dataSource={data}
           loading={loading}
+          scroll={{ x: 1100 }}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,
@@ -307,10 +228,8 @@ const UsersPage = () => {
         />
       </div>
 
-
-      {/* 弹窗表单 */}
       <Modal
-        title={editingUser ? '编辑用户' : '添加用户'}
+        title="编辑账号"
         open={modalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
@@ -318,39 +237,40 @@ const UsersPage = () => {
         cancelText="取消"
       >
         <Form form={modalForm} layout="vertical">
-          <Form.Item<UserFormData>
-            name="username"
-            label="用户名"
-            rules={[{ required: true, message: '请输入用户名' }]}
-          >
-            <Input placeholder="请输入用户名" />
+          <Form.Item label="用户名">
+            <Input
+              value={editingUser?.employee_name || ''}
+              placeholder="未关联员工档案"
+              disabled
+            />
           </Form.Item>
-          <Form.Item<UserFormData>
+          <Form.Item
+            name="username"
+            label="登录名"
+            rules={[{ required: true, message: '请输入登录名' }]}
+            extra="用于系统登录的账号名"
+          >
+            <Input placeholder="请输入登录名" />
+          </Form.Item>
+          <Form.Item
             name="email"
             label="邮箱"
             rules={[
               { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' }
+              { type: 'email', message: '请输入有效的邮箱地址' },
             ]}
           >
             <Input placeholder="请输入邮箱" />
           </Form.Item>
-          {/* 编辑时不校验密码 输入代表更新不输入代表不更新 */}
-          <Form.Item<UserFormData>
-            name="password"
-            label="密码"
-            rules={editingUser ? [] : [{ required: true, message: '请输入密码' }]}
-          >
-            <Input.Password placeholder={editingUser ? '请输入密码（留空不更新）' : '请输入密码'} />
+          <Form.Item name="password" label="密码">
+            <Input.Password placeholder="留空则不更新密码" />
           </Form.Item>
-          <Form.Item<UserFormData>
-            name="role"
-            label="角色"
-            rules={[{ required: true, message: '请选择角色' }]}
-          >
+          <Form.Item name="role" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
             <Select placeholder="请选择角色">
-              {roles.map(role => (
-                <Select.Option key={role.id} value={role.role_code}>{role.role_name}</Select.Option>
+              {roles.map((role) => (
+                <Select.Option key={role.id} value={role.role_code}>
+                  {role.role_name}
+                </Select.Option>
               ))}
             </Select>
           </Form.Item>

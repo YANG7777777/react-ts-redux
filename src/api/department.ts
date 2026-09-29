@@ -1,31 +1,31 @@
 import request from '../utils/request';
+import type { PageParams, PageResult } from './types';
 
-export interface DepartmentParams {
-  department_name?: string;
+export interface DepartmentParams extends PageParams {
+  dept_name?: string;
   id?: number;
-  current?: number;
-  pageSize?: number;
 }
 
 export interface DepartmentResponse {
   id: number;
   dept_name: string;
   dept_code: string;
-  parent_id?: number;
+  parent_id?: number | null;
   parent_name?: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface DepartmentListResponse {
-  list: DepartmentResponse[];
-  total: number;
-}
+export type DepartmentListResponse = PageResult<DepartmentResponse>;
 
-export const getDepartmentList = async (params: DepartmentParams = {}): Promise<DepartmentListResponse> => {
-  const response = await request.get<DepartmentListResponse>('/departments/all', params);
-  console.log('部门列表原始返回:', response);
-  return response.data as unknown as DepartmentListResponse;
+export const getDepartmentList = async (
+  params: DepartmentParams = {}
+): Promise<DepartmentListResponse> => {
+  const response = await request.get<DepartmentListResponse>(
+    '/departments/all',
+    params as Record<string, unknown>
+  );
+  return response.data;
 };
 
 export const deleteDepartment = async (id: number): Promise<void> => {
@@ -42,7 +42,10 @@ export const createDepartment = async (data: DepartmentFormData): Promise<Depart
   return response.data;
 };
 
-export const updateDepartment = async (id: number, data: DepartmentFormData): Promise<DepartmentResponse> => {
+export const updateDepartment = async (
+  id: number,
+  data: DepartmentFormData
+): Promise<DepartmentResponse> => {
   const response = await request.put<DepartmentResponse>(`/departments/update/${id}`, data);
   return response.data;
 };

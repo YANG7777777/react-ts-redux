@@ -5,7 +5,12 @@ interface UserInfo {
   id: number;
   username: string;
   email?: string;
-  [key: string]: any;
+  role?: number;
+  role_name?: string;
+  /** 关联员工档案 ID（employees.id），请假/审批请用此字段 */
+  employee_id?: number | null;
+  employee_name?: string | null;
+  [key: string]: unknown;
 }
 
 interface AuthState {

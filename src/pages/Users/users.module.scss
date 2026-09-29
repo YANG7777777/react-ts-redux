@@ -1,18 +1,54 @@
 .users {
-  padding: 0 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  .searchBox {
-    padding-top: 16px;
-    width: 100%;
-    .searchForm {
-        width: 100%;
-        .searchItem {
-            margin-left: auto;
-            margin-right: 0;
-        }
-    }
+  min-height: 0;
+  padding: 20px;
+  background: #f5f7fa;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  > :global(*) {
+    flex-shrink: 0;
   }
-  .tableBox {
-    height: calc(100% - 106px);
-  }
+}
+
+.searchBox {
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.searchForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 0;
+  width: 100%;
+}
+
+.searchItem {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.tableBox {
+  flex: 1;
+  flex-shrink: 1 !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.muted {
+  color: #bfbfbf;
+  font-size: 13px;
 }
